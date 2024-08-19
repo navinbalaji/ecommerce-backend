@@ -28,6 +28,6 @@ app.use('/auth', authRouter);
 
 app.listen(PORT, () => {
     // init database
-    // connectDB()
+    connectDB()
     console.log('Server is running on PORT ', PORT);
 });
