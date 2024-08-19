@@ -33,6 +33,10 @@ export const login = async (req, res) => {
             throw new Error('Password incorrect');
         }
 
+        if (!customerData.is_verified) {
+            throw new Error('Please verify your account information');
+        }
+
         const token = signJwtToken({ cid: customerData._id });
 
         return res
@@ -53,10 +57,25 @@ export const login = async (req, res) => {
  * @returns {Response}
  */
 
-export const register = (req, res) => {
+export const register = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { name, email, password, phone_number, date_of_birth } = req.body;
+
+        // TODO: Send Verification Email
+
+        await customerSchema.create({
+            name,
+            email,
+            password,
+            phone_number,
+            date_of_birth,
+            is_verified: false,
+          });
+          
+        return res
+            .status(200)
+            .json(successResponse('Customer Registered successfully'));
     } catch (err) {
-        return res.status(400).json(failureResponse('something went wrong'));
+        return res.status(400).json(failureResponse(err?.message||'something went wrong'));
     }
 };

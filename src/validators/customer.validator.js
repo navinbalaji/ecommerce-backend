@@ -17,17 +17,21 @@ export const registerSchema = yup.object().shape({
         .string()
         .email('Invalid email address')
         .required('Email is required'),
+    password: yup.string().required('Password is required'),
     phone_number: yup.string().required('Phone Number is required'),
     date_of_birth: yup.date().required('Date of Birth is required'),
-    address: yup.array().of(
-        yup.object().shape({
-            line1: yup.string().notRequired(),
-            line2: yup.string().notRequired(),
-            landmark: yup.string().notRequired(),
-            city: yup.string().notRequired(),
-            state: yup.string().notRequired(),
-            country: yup.string().notRequired(),
-            pincode: yup.number().notRequired(),
-        })
-    ).notRequired(),
+    address: yup
+        .array()
+        .of(
+            yup.object().shape({
+                line1: yup.string().notRequired(),
+                line2: yup.string().notRequired(),
+                landmark: yup.string().notRequired(),
+                city: yup.string().notRequired(),
+                state: yup.string().notRequired(),
+                country: yup.string().notRequired(),
+                pincode: yup.number().notRequired(),
+            })
+        )
+        .notRequired(),
 });

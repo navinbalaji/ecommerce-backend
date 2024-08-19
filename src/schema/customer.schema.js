@@ -48,6 +48,9 @@ const customerSchema = new Schema({
         index: true,
     },
     address: customerAddressSchema,
+    is_verified: {
+        type: Boolean,
+    },
 });
 
 customerSchema.pre('save', async function (next) {

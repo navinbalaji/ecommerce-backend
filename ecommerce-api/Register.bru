@@ -1,0 +1,21 @@
+meta {
+  name: Register
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Navin",
+    "email": "navin@gmail.com",
+    "password": "1234567890",
+    "phone_number": "+91-1234567890",
+    "date_of_birth": "11/09/1999"
+  }
+}
