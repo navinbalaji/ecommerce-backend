@@ -5,8 +5,9 @@ import { Router } from 'express';
 // services
 import {
     createProduct,
-    getProducts,
+    getProduct,
     updateProduct,
+    getAllProducts,
 } from '#services/product/product.service.js';
 
 // validators
@@ -17,7 +18,9 @@ import { validate } from '#common';
 
 const productRouter = new Router();
 
-productRouter.get('/', getProducts);
+productRouter.get('/', getProduct);
+
+productRouter.get('/all', getAllProducts);
 
 productRouter.post('/', validate(productCreateSchema), createProduct);
 
