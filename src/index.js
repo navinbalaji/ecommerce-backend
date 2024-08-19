@@ -5,8 +5,12 @@ import 'dotenv/config';
 
 import connectDB from './db/mongoose.js';
 
+// middleware
+import tokenExpirationMiddleware from "./middleware/jwtToken.js"
+
 // routes
 import authRouter from './controllers/auth/auth.controller.js';
+import productRouter from './controllers/product/product.controller.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -19,12 +23,19 @@ app.use(
 app.use(morgan('tiny'));
 app.use(express.json())
 app.get('/ping', (_, res) => res.status(200).send('pong'));
+app.use('/auth', authRouter);
 
 /**
  * Middleware token handle
  */
 
-app.use('/auth', authRouter);
+
+app.use(tokenExpirationMiddleware)
+/**
+ * Routes
+ */
+
+app.use('/product', productRouter);
 
 app.listen(PORT, () => {
     // init database

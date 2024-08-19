@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { getPasswordHashed } from '#common';
+import bcrypt from 'bcrypt';
 
 const customerAddressSchema = new Schema({
     line1: {
@@ -55,9 +55,14 @@ const customerSchema = new Schema({
 
 customerSchema.pre('save', async function (next) {
     if (this.isModified('password')) {
-        this.password = getPasswordHashed(this.password);
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
     }
     next();
 });
+
+customerSchema.methods.comparePassword = async function (password) {
+    return await bcrypt.compare(password, this.password);
+};
 
 export default model('Customer', customerSchema);

@@ -1,11 +1,10 @@
 // schema
-import customerSchema from '#schema/customer.schema.js';
+import Customer from '#schema/customer.schema.js';
 
 // utils
 import {
     successResponse,
     failureResponse,
-    verifyPassword,
     signJwtToken,
 } from '#common';
 
@@ -21,23 +20,23 @@ export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const customerData = await customerSchema.findOne({ email });
+        const customer = await Customer.findOne({ email });
 
-        if (!customerData) {
+        if (!customer) {
             throw new Error('Customer not found');
         }
 
-        const isPasswordValid = verifyPassword(password, customerData.password);
+        const isPasswordValid = await customer.comparePassword(password);
 
         if (!isPasswordValid) {
             throw new Error('Password incorrect');
         }
 
-        if (!customerData.is_verified) {
+        if (!customer.is_verified) {
             throw new Error('Please verify your account information');
         }
 
-        const token = signJwtToken({ cid: customerData._id });
+        const token = signJwtToken({ cid: customer._id });
 
         return res
             .status(200)
@@ -63,7 +62,7 @@ export const register = async (req, res) => {
 
         // TODO: Send Verification Email
 
-        await customerSchema.create({
+        await Customer.create({
             name,
             email,
             password,
