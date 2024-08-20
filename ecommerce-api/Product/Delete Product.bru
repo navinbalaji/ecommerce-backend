@@ -1,0 +1,56 @@
+meta {
+  name: Delete Product
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/product/:id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 66c4deff1093f08be16bd4e4
+}
+
+body:json {
+  {
+    "title": "Shirt-1",
+    "gender": "MALE",
+    "product_type": "shirts",
+    "status": "ACTIVE",
+    "tags": [],
+    "variants": [
+      {
+        "title": "Shirt",
+        "color": "#FFFFFF",
+        "status": "ACTIVE",
+        "images": [
+          {
+            "position": 1,
+            "src": "https://google.com"
+          }
+        ],
+        "sizes": [
+          {
+            "size": "L",
+            "compare_at_price": 200,
+            "sku": "12345",
+            "inventory_quantity": 10,
+            "weight": 100,
+            "weight_unit": "GM"
+          },
+          {
+            "size": "M",
+            "compare_at_price": 200,
+            "sku": "123456",
+            "inventory_quantity": 10,
+            "weight": 100,
+            "weight_unit": "GM"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -48,7 +48,7 @@ export const getAllProducts = async (req, res) => {
                     data: [
                         { $skip: Number(offset) || 0 },
                         { $limit: Number(limit) || 10 }, // default limit to 10 if not provided
-                        { $sort: { _id: 1} }, 
+                        { $sort: { _id: 1 } },
                     ],
                     totalCount: [
                         { $count: 'total' }, // count the total number of documents
@@ -67,9 +67,12 @@ export const getAllProducts = async (req, res) => {
 
         const { data, totalCount } = products; // extract the data and total count
 
-        return res
-            .status(200)
-            .json(successResponse({ products: data, totalCount }));
+        return res.status(200).json(
+            successResponse('Products fetched successfully', {
+                products: data,
+                totalCount,
+            })
+        );
     } catch (err) {
         return res
             .status(400)
@@ -77,10 +80,74 @@ export const getAllProducts = async (req, res) => {
     }
 };
 
-export const getProduct = (req, res) => {
-    return res.send('getProducts');
+export const getProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!id) {
+            throw new Error('Product Id is missing');
+        }
+        const product = await Product.findById(id).lean().exec();
+
+        if (!product) {
+            return res.status(404).json(failureResponse('Product not found'));
+        }
+
+        return res
+            .status(200)
+            .json(successResponse('Product fetched successfully', { product }));
+    } catch (err) {
+        return res
+            .status(400)
+            .json(failureResponse(err?.message || 'something went wrong'));
+    }
 };
 
-export const updateProduct = (req, res) => {
-    return res.send('updateProduct');
+export const updateProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const productData = req.body;
+
+        if (!id) {
+            throw new Error('Product Id is missing');
+        }
+        const product = await Product.findByIdAndUpdate(id, {
+            ...productData,
+        }).exec();
+
+        if (!product) {
+            throw new Error('Product update failed');
+        }
+
+        return res
+            .status(200)
+            .json(successResponse('Product updated successfully'));
+    } catch (err) {
+        return res
+            .status(400)
+            .json(failureResponse(err?.message || 'something went wrong'));
+    }
+};
+
+export const deleteProduct = async(req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!id) {
+            throw new Error('Product Id is missing');
+        }
+        const product = await Product.findByIdAndDelete(id).exec();
+
+        if (!product) {
+            throw new Error('Product delete failed');
+        }
+
+        return res
+            .status(200)
+            .json(successResponse('Product deleted successfully'));
+    } catch (err) {
+        return res
+            .status(400)
+            .json(failureResponse(err?.message || 'something went wrong'));
+    }
 };

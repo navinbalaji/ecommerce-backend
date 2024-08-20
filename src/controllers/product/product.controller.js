@@ -8,6 +8,7 @@ import {
     getProduct,
     updateProduct,
     getAllProducts,
+    deleteProduct,
 } from '#services/product/product.service.js';
 
 // validators
@@ -18,12 +19,14 @@ import { validate } from '#common';
 
 const productRouter = new Router();
 
-productRouter.get('/', getProduct);
-
 productRouter.get('/all', getAllProducts);
+
+productRouter.get('/:id', getProduct);
 
 productRouter.post('/', validate(productCreateSchema), createProduct);
 
-productRouter.put('/', updateProduct);
+productRouter.put('/:id', validate(productCreateSchema), updateProduct);
+
+productRouter.delete('/:id', deleteProduct);
 
 export default productRouter;
