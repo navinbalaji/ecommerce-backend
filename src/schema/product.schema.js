@@ -8,7 +8,7 @@ import {
 
 const variantImageSchema = new Schema({
     position: {
-        type: String,
+        type: Number,
     },
     src: {
         type: String,

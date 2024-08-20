@@ -18,6 +18,10 @@ const variantSizeSchema = yup.object().shape({
         .required('Weight Unit is required'),
 });
 
+const variantImageSchema = yup.object().shape({
+    position: yup.number().required('Position is required'),
+    src: yup.string().required('Image Source is required'),
+});
 const variantSchema = yup.object().shape({
     title: yup.string().required('Title is required'),
     color: yup.string().required('Color is required'),
@@ -27,12 +31,7 @@ const variantSchema = yup.object().shape({
         .required('Variant Status is required'),
     images: yup
         .array()
-        .of(
-            yup.object().shape({
-                position: yup.number().required('Position is required'),
-                src: yup.string().required('Image Source is required'),
-            })
-        )
+        .of(variantImageSchema)
         .min(1)
         .required('Images are required'),
     sizes: yup
