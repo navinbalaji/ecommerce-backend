@@ -6,6 +6,38 @@ meta {
 
 post {
   url: {{baseUrl}}/product
-  body: none
-  auth: none
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "title": "Shirt",
+    "gender": "MALE",
+    "product_type": "shirts",
+    "status": "ACTIVE",
+    "variants": [
+      {
+        "title": "Shirt",
+        "status": "ACTIVE",
+        "color": "#FFFFFF",
+        "images": [
+          {
+            "position": "1",
+            "src": "https://google.com"
+          }
+        ],
+        "sizes": [
+          {
+            "size": "L",
+            "compare_at_price": 200,
+            "sku": "12345",
+            "inventory_quantity": 10,
+            "weight": 100,
+            "weight_unit": "GM"
+          }
+        ]
+      }
+    ]
+  }
 }

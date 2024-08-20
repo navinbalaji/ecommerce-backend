@@ -81,7 +81,7 @@ const productSchema = new Schema(
             type: [String],
             index: true,
         },
-        variants: variantSchema,
+        variants: [variantSchema],
     },
     {
         timestamps: true,
