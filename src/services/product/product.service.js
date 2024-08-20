@@ -80,6 +80,15 @@ export const getAllProducts = async (req, res) => {
     }
 };
 
+/**
+ * Handles a GET request to get a product.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response}
+ */
+
+
 export const getProduct = async (req, res) => {
     try {
         const { id } = req.params;
@@ -102,6 +111,16 @@ export const getProduct = async (req, res) => {
             .json(failureResponse(err?.message || 'something went wrong'));
     }
 };
+
+
+/**
+ * Handles a PUT request to update a product.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response}
+ */
+
 
 export const updateProduct = async (req, res) => {
     try {
@@ -128,6 +147,16 @@ export const updateProduct = async (req, res) => {
             .json(failureResponse(err?.message || 'something went wrong'));
     }
 };
+
+
+/**
+ * Handles a DELETE request to delete a product.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response}
+ */
+
 
 export const deleteProduct = async(req, res) => {
     try {
