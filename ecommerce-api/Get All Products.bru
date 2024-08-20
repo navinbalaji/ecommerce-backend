@@ -5,7 +5,12 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/product/all
+  url: {{baseUrl}}/product/all?limit=10
   body: none
   auth: inherit
+}
+
+params:query {
+  limit: 10
+  ~offset: 1
 }

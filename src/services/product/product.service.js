@@ -1,3 +1,5 @@
+import { Types } from 'mongoose';
+
 // schema
 import Product from '#schema/product.schema.js';
 
@@ -38,26 +40,17 @@ export const createProduct = async (req, res) => {
 
 export const getAllProducts = async (req, res) => {
     try {
-        const { start, after, offset, total } = req.query;
+        const { offset, limit } = req.query;
 
-        const query = {};
-        if (start) {
-            query._id = { $gt: start };
-        } else if (after) {
-            query._id = { $lt: after };
-        }
-
-        const [products] = await Product.aggregate([
+        const pipeline = [
             {
                 $facet: {
                     data: [
-                        { $match: query },
-                        { $sort: { _id: -1 } }, // sort by _id in descending order (newest first)
-                        { $skip: offset }, // skip the specified number of documents
-                        { $limit: total }, // limit the number of documents returned
+                        { $skip: Number(offset) || 0 },
+                        { $limit: Number(limit) || 10 }, // default limit to 10 if not provided
+                        { $sort: { _id: 1} }, 
                     ],
                     totalCount: [
-                        { $match: query },
                         { $count: 'total' }, // count the total number of documents
                     ],
                 },
@@ -68,7 +61,9 @@ export const getAllProducts = async (req, res) => {
                     totalCount: { $arrayElemAt: ['$totalCount.total', 0] }, // extract the total count from the array
                 },
             },
-        ]);
+        ];
+
+        const [products] = await Product.aggregate(pipeline);
 
         const { data, totalCount } = products; // extract the data and total count
 
