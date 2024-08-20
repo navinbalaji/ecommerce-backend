@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+"use strict";
 
 // schema
 import Product from '#schema/product.schema.js';
