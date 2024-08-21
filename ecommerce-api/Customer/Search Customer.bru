@@ -5,13 +5,13 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/customer/search?name=navin&email&phone_number
+  url: {{baseUrl}}/customer/search?phone_number=1234567890
   body: none
   auth: inherit
 }
 
 params:query {
-  name: navin
-  email: 
-  phone_number: 
+  phone_number: 1234567890
+  ~name: navin
+  ~email: navin@gmail.com
 }
