@@ -7,7 +7,7 @@ import {
     getAllCustomers,
     getCustomer,
     updateCustomer,
-    searchCustomer
+    searchCustomer,
 } from '#services/customer/customer.service.js';
 
 // validators
@@ -15,10 +15,12 @@ import { customerUpdateSchema } from '#src/validators/customer.validator.js';
 
 // utils
 import { validate } from '#common';
+import { ROLES } from '#constants';
+import roleMiddleware from '#middleware/roleMiddleware.js';
 
 const customerRouter = new Router();
 
-customerRouter.get('/all', getAllCustomers);
+customerRouter.get('/all', roleMiddleware(ROLES.ADMIN), getAllCustomers);
 
 customerRouter.get('/search', searchCustomer);
 

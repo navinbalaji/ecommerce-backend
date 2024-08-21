@@ -8,6 +8,8 @@ import {
     signJwtToken,
 } from '#common';
 
+import { ROLES } from '#src/constants.js';
+
 /**
  * Handles a POST request to login a  user.
  *
@@ -36,7 +38,7 @@ export const login = async (req, res) => {
             throw new Error('Please verify your account information');
         }
 
-        const token = signJwtToken({ cid: customer._id });
+        const token = signJwtToken({ cid: customer._id,role:customer.role });
 
         return res
             .status(200)
@@ -68,6 +70,7 @@ export const register = async (req, res) => {
             password,
             phone_number,
             date_of_birth,
+            role:ROLES.USER,
             is_verified: false,
           });
           

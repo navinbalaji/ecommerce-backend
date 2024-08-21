@@ -1,4 +1,5 @@
 import { failureResponse } from '#src/common.js';
+import { ROLE } from '#src/constants.js';
 import jwt from 'jsonwebtoken';
 
 const tokenExpirationMiddleware = (req, res, next) => {
@@ -9,10 +10,17 @@ const tokenExpirationMiddleware = (req, res, next) => {
             .status(401)
             .json(failureResponse('Access denied. No token provided.'));
     }
-    
+
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
         req.user = decoded;
+
+        if (!ROLE.includes(req.user.role)) {
+            return res
+                .status(403)
+                .json(failureResponse('Forbidden. unknown role.'));
+        }
+
         next();
     } catch (ex) {
         if (ex.name === 'TokenExpiredError') {

@@ -18,6 +18,8 @@ import { productCreateSchema } from '#src/validators/product.validator.js';
 
 // utils
 import { validate } from '#common';
+import { ROLES } from '#constants';
+import roleMiddleware from '#middleware/roleMiddleware.js';
 
 const productRouter = new Router();
 
@@ -29,10 +31,10 @@ productRouter.get('/best-selling', getBestSellingProducts);
 
 productRouter.get('/:id', getProduct);
 
-productRouter.post('/', validate(productCreateSchema), createProduct);
+productRouter.post('/', roleMiddleware(ROLES.ADMIN),validate(productCreateSchema), createProduct);
 
-productRouter.put('/:id', validate(productCreateSchema), updateProduct);
+productRouter.put('/:id',roleMiddleware(ROLES.ADMIN), validate(productCreateSchema), updateProduct);
 
-productRouter.delete('/:id', deleteProduct);
+productRouter.delete('/:id', roleMiddleware(ROLES.ADMIN),deleteProduct);
 
 export default productRouter;
