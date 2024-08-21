@@ -180,3 +180,69 @@ export const deleteProduct = async(req, res) => {
             .json(failureResponse(err?.message || 'something went wrong'));
     }
 };
+
+
+/**
+ * Handles a GET request to return a new product.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response}
+ */
+
+
+export const getNewProducts = async(req, res) => {
+    // try {
+    //     const { id } = req.params;
+
+    //     if (!id) {
+    //         throw new Error('Product Id is missing');
+    //     }
+    //     const product = await Product.findByIdAndDelete(id).exec();
+
+    //     if (!product) {
+    //         throw new Error('Product delete failed');
+    //     }
+
+    //     return res
+    //         .status(200)
+    //         .json(successResponse('Product deleted successfully'));
+    // } catch (err) {
+    //     return res
+    //         .status(400)
+    //         .json(failureResponse(err?.message || 'something went wrong'));
+    // }
+};
+
+/**
+ * Handles a GET request to return Best Selling Products.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response}
+ */
+
+
+export const getBestSellingProducts = async(req, res) => {
+    // try {
+    //     const { id } = req.params;
+
+    //     if (!id) {
+    //         throw new Error('Product Id is missing');
+    //     }
+    //     const product = await Product.findByIdAndDelete(id).exec();
+
+    //     if (!product) {
+    //         throw new Error('Product delete failed');
+    //     }
+
+    //     return res
+    //         .status(200)
+    //         .json(successResponse('Product deleted successfully'));
+    // } catch (err) {
+    //     return res
+    //         .status(400)
+    //         .json(failureResponse(err?.message || 'something went wrong'));
+    // }
+};
+

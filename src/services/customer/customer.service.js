@@ -5,6 +5,7 @@ import Customer from '#schema/customer.schema.js';
 
 // utils
 import { successResponse, failureResponse } from '#common';
+import { customerTransform } from '#transformers/customer.transformer.js';
 
 /**
  * Handles a GET request to get all customers.
@@ -45,7 +46,7 @@ export const getAllCustomers = async (req, res) => {
 
         return res.status(200).json(
             successResponse('Customers fetched successfully', {
-                customers: data,
+                customers: data?.map((customer) => customerTransform(customer)),
                 totalCount,
             })
         );
@@ -80,7 +81,9 @@ export const getCustomer = async (req, res) => {
         return res
             .status(200)
             .json(
-                successResponse('Customer fetched successfully', { customer })
+                successResponse('Customer fetched successfully', {
+                    customer: customerTransform(customer),
+                })
             );
     } catch (err) {
         return res
@@ -165,7 +168,12 @@ export const searchCustomer = async (req, res) => {
 
         return res
             .status(200)
-            .json(successResponse('Customer found successfully', customer));
+            .json(
+                successResponse(
+                    'Customer found successfully',
+                    customerTransform(customer)
+                )
+            );
     } catch (err) {
         return res
             .status(400)

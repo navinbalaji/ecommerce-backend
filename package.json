@@ -28,7 +28,8 @@
         "#schema/*": "./src/schema/*",
         "#services/*": "./src/services/*",
         "#constants": "./src/constants.js",
-        "#validators/*": "./src/validators/*"
+        "#validators/*": "./src/validators/*",
+        "#transformers/*": "./src/transformers/*"
     },
     "devDependencies": {
         "@types/express": "^4.17.21"

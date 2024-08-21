@@ -9,6 +9,8 @@ import {
     updateProduct,
     getAllProducts,
     deleteProduct,
+    getNewProducts,
+    getBestSellingProducts
 } from '#services/product/product.service.js';
 
 // validators
@@ -20,6 +22,10 @@ import { validate } from '#common';
 const productRouter = new Router();
 
 productRouter.get('/all', getAllProducts);
+
+productRouter.get('/new', getNewProducts);
+
+productRouter.get('/best-selling', getBestSellingProducts);
 
 productRouter.get('/:id', getProduct);
 

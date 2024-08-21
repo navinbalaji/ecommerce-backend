@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
+import { ROLE } from '#constants';
 
 const customerAddressSchema = new Schema({
     line1: {
@@ -45,6 +46,11 @@ const customerSchema = new Schema({
     },
     date_of_birth: {
         type: String,
+        index: true,
+    },
+    role: {
+        type: String,
+        enum: ROLE,
         index: true,
     },
     address: customerAddressSchema,
