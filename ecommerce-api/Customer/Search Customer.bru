@@ -1,0 +1,17 @@
+meta {
+  name: Search Customer
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/customer/search?name=navin&email&phone_number
+  body: none
+  auth: inherit
+}
+
+params:query {
+  name: navin
+  email: 
+  phone_number: 
+}

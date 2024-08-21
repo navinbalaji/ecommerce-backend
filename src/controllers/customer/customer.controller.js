@@ -7,6 +7,7 @@ import {
     getAllCustomers,
     getCustomer,
     updateCustomer,
+    searchCustomer
 } from '#services/customer/customer.service.js';
 
 // validators
@@ -18,6 +19,8 @@ import { validate } from '#common';
 const customerRouter = new Router();
 
 customerRouter.get('/all', getAllCustomers);
+
+customerRouter.get('/search', searchCustomer);
 
 customerRouter.get('/:id', getCustomer);
 

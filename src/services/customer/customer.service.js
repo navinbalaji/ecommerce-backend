@@ -1,11 +1,10 @@
-"use strict";
+'use strict';
 
 // schema
 import Customer from '#schema/customer.schema.js';
 
 // utils
 import { successResponse, failureResponse } from '#common';
-
 
 /**
  * Handles a GET request to get all customers.
@@ -65,7 +64,6 @@ export const getAllCustomers = async (req, res) => {
  * @returns {Response}
  */
 
-
 export const getCustomer = async (req, res) => {
     try {
         const { id } = req.params;
@@ -81,14 +79,15 @@ export const getCustomer = async (req, res) => {
 
         return res
             .status(200)
-            .json(successResponse('Customer fetched successfully', { customer }));
+            .json(
+                successResponse('Customer fetched successfully', { customer })
+            );
     } catch (err) {
         return res
             .status(400)
             .json(failureResponse(err?.message || 'something went wrong'));
     }
 };
-
 
 /**
  * Handles a PUT request to update a customer.
@@ -97,7 +96,6 @@ export const getCustomer = async (req, res) => {
  * @param {Response} res
  * @returns {Response}
  */
-
 
 export const updateCustomer = async (req, res) => {
     try {
@@ -122,5 +120,55 @@ export const updateCustomer = async (req, res) => {
         return res
             .status(400)
             .json(failureResponse(err?.message || 'something went wrong'));
+    }
+};
+
+/**
+ * Handles a GET request to search a customer.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response}
+ */
+
+export const searchCustomer = async (req, res) => {
+    try {
+        const { name, phone_number, email } = req.query;
+
+        if (!name && !phone_number && !email) {
+            throw new Error(
+                'At least one of name, phone number, or email is required'
+            );
+        }
+
+        const query = {};
+
+        if (name) {
+            query['name'] = { $regex: `.*${name}.*`, $options: 'i' };
+        }
+        if (phone_number) {
+            const formattedPhoneNumber = phone_number.replace(/[^0-9]/g, '');
+            query['phone_number'] = {
+                $regex: `.*${formattedPhoneNumber}.*`,
+                $options: 'i',
+            };
+        }
+        if (email) {
+            query['email'] = { $regex: `.*${email}.*`, $options: 'i' };
+        }
+
+        const customer = await Customer.findOne(query).exec();
+
+        if (!customer) {
+            return res.status(404).json(failureResponse('Customer not found'));
+        }
+
+        return res
+            .status(200)
+            .json(successResponse('Customer found successfully', customer));
+    } catch (err) {
+        return res
+            .status(400)
+            .json(failureResponse(err?.message || 'Something went wrong'));
     }
 };

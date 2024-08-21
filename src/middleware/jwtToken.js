@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 
 const tokenExpirationMiddleware = (req, res, next) => {
     const authHeader = req.header('Authorization');
-    const token = authHeader.split(' ')?.[1];
+    const token = authHeader?.split(' ')?.[1] || null;
     if (!token) {
         return res
             .status(401)
