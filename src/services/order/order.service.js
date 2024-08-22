@@ -46,7 +46,7 @@ export const createOrder = async (req, res) => {
             const sized_product = product?.variants.sizes.find(e => e.size === cart_product.size);
 
             if (!sized_product || sized_product.inventory_quantity === 0) {
-                throw new Error(`Product: ${product.name} is out of stock`);
+                throw new Error(`Product: ${product.name} of size ${cart_product.size} is out of stock`);
             }
 
             order_amount += cart_product.quantity * sized_product.price;
