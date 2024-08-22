@@ -23,7 +23,7 @@ export const createProduct = async (req, res) => {
         session.startTransaction();
         const productData = req.body;
 
-        await Product.create(productData);
+        await Product.create(productData,{session});
 
         // Update analytics
         await Analytics.findOneAndUpdate(

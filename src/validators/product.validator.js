@@ -9,6 +9,7 @@ import {
 const variantSizeSchema = yup.object().shape({
     size: yup.mixed().oneOf(PRODUCT_SIZES).required('Product Size is required'),
     compare_at_price: yup.number().required('Compare Price is required'),
+    price: yup.number().required('Product Price is required'),
     sku: yup.string().required('SKU is required'),
     inventory_quantity: yup.number().required('Inventory Quantity is required'),
     weight: yup.number().required('Weight is required'),
@@ -50,9 +51,5 @@ export const productCreateSchema = yup.object().shape({
         .oneOf(PRODUCT_STATUS)
         .required('Product Status is required'),
     tags: yup.array().of(yup.string()).notRequired(),
-    variants: yup
-        .array()
-        .of(variantSchema)
-        .min(1, 'Minimim 1 Variant is required')
-        .required('Variant is required'),
+    variants: yup.object().shape(variantSchema).required('Variant is required'),
 });

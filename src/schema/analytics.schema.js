@@ -13,9 +13,13 @@ const analyticsSchema = new Schema(
         total_products: {
             type: Number,
         },
+        total_orders: {
+            type: Number,
+        },
         total_order_amount: {
             type: Number,
         },
+
     },
     {
         timestamps: true,

@@ -23,6 +23,9 @@ const variantSizeSchema = new Schema({
     compare_at_price: {
         type: Number,
     },
+    price: {
+        type: Number,
+    },
     sku: {
         type: String,
         index: true,
@@ -81,7 +84,7 @@ const productSchema = new Schema(
             type: [String],
             index: true,
         },
-        variants: [variantSchema],
+        variants: variantSchema,
     },
     {
         timestamps: true,
