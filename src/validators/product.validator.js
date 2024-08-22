@@ -23,6 +23,7 @@ const variantImageSchema = yup.object().shape({
     position: yup.number().required('Position is required'),
     src: yup.string().required('Image Source is required'),
 });
+
 const variantSchema = yup.object().shape({
     title: yup.string().required('Title is required'),
     color: yup.string().required('Color is required'),
@@ -51,5 +52,5 @@ export const productCreateSchema = yup.object().shape({
         .oneOf(PRODUCT_STATUS)
         .required('Product Status is required'),
     tags: yup.array().of(yup.string()).notRequired(),
-    variants: yup.object().shape(variantSchema).required('Variant is required'),
+    variants: variantSchema.required('Variant is required')
 });

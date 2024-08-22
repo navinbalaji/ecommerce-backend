@@ -76,7 +76,7 @@ export const createAndUpdateCart = async (req, res) => {
             customerCart.products = eligibleProductsForOrder;
             cartData = await customerCart.save({ session });
         } else {
-            cartData = await Cart.create(cartUpdateData, { session });
+            cartData = await Cart.create([cartUpdateData], { session });
         }
 
         await session.commitTransaction();

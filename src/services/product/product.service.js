@@ -23,7 +23,7 @@ export const createProduct = async (req, res) => {
         session.startTransaction();
         const productData = req.body;
 
-        await Product.create(productData,{session});
+        await Product.create([productData], { session });
 
         // Update analytics
         await Analytics.findOneAndUpdate(
@@ -44,8 +44,11 @@ export const createProduct = async (req, res) => {
         return res
             .status(400)
             .json(failureResponse(err?.message || 'something went wrong'));
+    } finally {
+        session.endSession(); 
     }
 };
+
 
 /**
  * Handles a GET request to get all products.

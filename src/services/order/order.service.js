@@ -81,7 +81,7 @@ export const createOrder = async (req, res) => {
 
         const order_number = generateOrderNumber();
         await Order.create(
-            {
+            [{
                 order_number,
                 order_amount,
                 customer_id: customerCart.customer_id,
@@ -90,7 +90,7 @@ export const createOrder = async (req, res) => {
                 is_cancelled: false,
                 is_fullfilled: true,
                 delivery_address: customerCart.delivery_address,
-            },
+            }],
             { session }
         );
 

@@ -67,7 +67,7 @@ export const register = async (req, res) => {
   
       // Create a new customer
       const customer = await Customer.create(
-        {
+        [{
           name,
           email,
           password,
@@ -75,7 +75,7 @@ export const register = async (req, res) => {
           date_of_birth,
           role: ROLES.USER,
           is_verified: false,
-        },
+        }],
         { session }
       );
   
