@@ -1,7 +1,10 @@
-"use strict";
+'use strict';
+
+import mongoose from 'mongoose';
 
 // schema
 import Product from '#schema/product.schema.js';
+import Analytics from '#schema/analytics.schema.js';
 
 // utils
 import { successResponse, failureResponse } from '#common';
@@ -15,15 +18,29 @@ import { successResponse, failureResponse } from '#common';
  */
 
 export const createProduct = async (req, res) => {
+    const session = await mongoose.startSession();
     try {
+        session.startTransaction();
         const productData = req.body;
 
         await Product.create(productData);
+
+        // Update analytics
+        await Analytics.findOneAndUpdate(
+            { name: 'dashboard' },
+            { $inc: { total_products: 1 } },
+            { session }
+        );
+
+        await session.commitTransaction();
 
         return res
             .status(200)
             .json(successResponse('Product Created successfully'));
     } catch (err) {
+        if (session.inTransaction) {
+            await session.abortTransaction();
+        }
         return res
             .status(400)
             .json(failureResponse(err?.message || 'something went wrong'));
@@ -88,7 +105,6 @@ export const getAllProducts = async (req, res) => {
  * @returns {Response}
  */
 
-
 export const getProduct = async (req, res) => {
     try {
         const { id } = req.params;
@@ -112,7 +128,6 @@ export const getProduct = async (req, res) => {
     }
 };
 
-
 /**
  * Handles a PUT request to update a product.
  *
@@ -120,7 +135,6 @@ export const getProduct = async (req, res) => {
  * @param {Response} res
  * @returns {Response}
  */
-
 
 export const updateProduct = async (req, res) => {
     try {
@@ -148,7 +162,6 @@ export const updateProduct = async (req, res) => {
     }
 };
 
-
 /**
  * Handles a DELETE request to delete a product.
  *
@@ -157,9 +170,10 @@ export const updateProduct = async (req, res) => {
  * @returns {Response}
  */
 
-
-export const deleteProduct = async(req, res) => {
+export const deleteProduct = async (req, res) => {
+    const session = await mongoose.startSession();
     try {
+        session.startTransaction();
         const { id } = req.params;
 
         if (!id) {
@@ -171,16 +185,27 @@ export const deleteProduct = async(req, res) => {
             throw new Error('Product delete failed');
         }
 
+        // Update analytics
+        await Analytics.findOneAndUpdate(
+            { name: 'dashboard' },
+            { $inc: { total_products: -1 } },
+            { session }
+        );
+
+        await session.commitTransaction();
+        
         return res
             .status(200)
             .json(successResponse('Product deleted successfully'));
     } catch (err) {
+        if (session.inTransaction) {
+            await session.abortTransaction();
+        }
         return res
             .status(400)
             .json(failureResponse(err?.message || 'something went wrong'));
     }
 };
-
 
 /**
  * Handles a GET request to return a new product.
@@ -190,20 +215,16 @@ export const deleteProduct = async(req, res) => {
  * @returns {Response}
  */
 
-
-export const getNewProducts = async(req, res) => {
+export const getNewProducts = async (req, res) => {
     // try {
     //     const { id } = req.params;
-
     //     if (!id) {
     //         throw new Error('Product Id is missing');
     //     }
     //     const product = await Product.findByIdAndDelete(id).exec();
-
     //     if (!product) {
     //         throw new Error('Product delete failed');
     //     }
-
     //     return res
     //         .status(200)
     //         .json(successResponse('Product deleted successfully'));
@@ -222,20 +243,16 @@ export const getNewProducts = async(req, res) => {
  * @returns {Response}
  */
 
-
-export const getBestSellingProducts = async(req, res) => {
+export const getBestSellingProducts = async (req, res) => {
     // try {
     //     const { id } = req.params;
-
     //     if (!id) {
     //         throw new Error('Product Id is missing');
     //     }
     //     const product = await Product.findByIdAndDelete(id).exec();
-
     //     if (!product) {
     //         throw new Error('Product delete failed');
     //     }
-
     //     return res
     //         .status(200)
     //         .json(successResponse('Product deleted successfully'));
@@ -245,4 +262,3 @@ export const getBestSellingProducts = async(req, res) => {
     //         .json(failureResponse(err?.message || 'something went wrong'));
     // }
 };
-

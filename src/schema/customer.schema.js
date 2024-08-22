@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
 import { ROLE } from '#constants';
 
-const customerAddressSchema = new Schema({
+export const customerAddressSchema = new Schema({
     line1: {
         type: String,
     },
@@ -57,6 +57,8 @@ const customerSchema = new Schema({
     is_verified: {
         type: Boolean,
     },
+},{
+    timestamps:true
 });
 
 customerSchema.pre('save', async function (next) {
