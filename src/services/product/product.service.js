@@ -29,7 +29,7 @@ export const createProduct = async (req, res) => {
         await Analytics.findOneAndUpdate(
             { name: 'dashboard' },
             { $inc: { total_products: 1 } },
-            { session }
+            { upsert: true, session }
         );
 
         await session.commitTransaction();
@@ -45,10 +45,9 @@ export const createProduct = async (req, res) => {
             .status(400)
             .json(failureResponse(err?.message || 'something went wrong'));
     } finally {
-        session.endSession(); 
+        session.endSession();
     }
 };
-
 
 /**
  * Handles a GET request to get all products.
@@ -192,11 +191,11 @@ export const deleteProduct = async (req, res) => {
         await Analytics.findOneAndUpdate(
             { name: 'dashboard' },
             { $inc: { total_products: -1 } },
-            { session }
+            { upsert: true, session }
         );
 
         await session.commitTransaction();
-        
+
         return res
             .status(200)
             .json(successResponse('Product deleted successfully'));

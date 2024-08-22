@@ -59,49 +59,51 @@ export const login = async (req, res) => {
 
 export const register = async (req, res) => {
     const session = await mongoose.startSession();
-  
+
     try {
-      session.startTransaction();
-  
-      const { name, email, password, phone_number, date_of_birth } = req.body;
-  
-      // Create a new customer
-      const customer = await Customer.create(
-        [{
-          name,
-          email,
-          password,
-          phone_number,
-          date_of_birth,
-          role: ROLES.USER,
-          is_verified: false,
-        }],
-        { session }
-      );
-  
-      // Update analytics
-      await Analytics.findOneAndUpdate(
-        { name: 'dashboard' },
-        { $inc: { total_customers: 1 } },
-        { session }
-      );
-  
-      await session.commitTransaction();
-  
-      // TODO: Send Verification Email
-  
-      return res
-        .status(200)
-        .json(successResponse('Customer Registered successfully', customer));
+        session.startTransaction();
+
+        const { name, email, password, phone_number, date_of_birth } = req.body;
+
+        // Create a new customer
+        const customer = await Customer.create(
+            [
+                {
+                    name,
+                    email,
+                    password,
+                    phone_number,
+                    date_of_birth,
+                    role: ROLES.USER,
+                    is_verified: false,
+                },
+            ],
+            { session }
+        );
+
+        // Update analytics
+        await Analytics.findOneAndUpdate(
+            { name: 'dashboard' },
+            { $inc: { total_customers: 1 } },
+            { upsert: true, session }
+        );
+
+        await session.commitTransaction();
+
+        // TODO: Send Verification Email
+
+        return res
+            .status(200)
+            .json(
+                successResponse('Customer Registered successfully', customer)
+            );
     } catch (err) {
-      if (session.inTransaction) {
-        await session.abortTransaction();
-      }
-  
-      return res
-        .status(400)
-        .json(failureResponse(err?.message || 'Something went wrong'));
+        if (session.inTransaction) {
+            await session.abortTransaction();
+        }
+
+        return res
+            .status(400)
+            .json(failureResponse(err?.message || 'Something went wrong'));
     }
-  };
-  
-  
+};

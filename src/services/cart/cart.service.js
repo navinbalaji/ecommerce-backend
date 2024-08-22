@@ -61,7 +61,7 @@ export const createAndUpdateCart = async (req, res) => {
             email,
             customer_id: customer._id,
             products: eligibleProductsForOrder,
-            delivery_address: is_default_address
+            delivery_address: new Boolean(is_default_address)
                 ? customer.address
                 : new_delivery_address,
         };

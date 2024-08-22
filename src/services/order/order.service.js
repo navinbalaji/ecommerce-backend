@@ -31,7 +31,6 @@ export const createOrder = async (req, res) => {
         }
 
         const customerCart = await Cart.findOne({ email })
-            .lean()
             .session(session)
             .exec();
         if (!customerCart || customerCart.products.length === 0) {
@@ -59,10 +58,10 @@ export const createOrder = async (req, res) => {
             if (
                 !sized_product ||
                 sized_product.inventory_quantity === 0 ||
-                sized_product.inventory_quantity > cart_product.quantity
+                sized_product.inventory_quantity < cart_product.quantity
             ) {
                 throw new Error(
-                    `${product.name} of size ${cart_product.size} is out of stock`
+                    `${product.title} of size ${cart_product.size} is out of stock`
                 );
             }
 
@@ -81,25 +80,30 @@ export const createOrder = async (req, res) => {
 
         const order_number = generateOrderNumber();
         await Order.create(
-            [{
-                order_number,
-                order_amount,
-                customer_id: customerCart.customer_id,
-                cart: customerCart,
-                is_delivered: false,
-                is_cancelled: false,
-                is_fullfilled: true,
-                delivery_address: customerCart.delivery_address,
-            }],
+            [
+                {
+                    order_number,
+                    order_amount,
+                    customer_id: customerCart.customer_id,
+                    cart: customerCart,
+                    is_delivered: false,
+                    is_cancelled: false,
+                    is_fullfilled: true,
+                    delivery_address: customerCart.delivery_address,
+                },
+            ],
             { session }
         );
+
+        // remove the cart
+        await Cart.deleteOne({ email }, { session });
 
         // TODO: Send order email
 
         await Analytics.findOneAndUpdate(
             { name: 'dashboard' },
             { $inc: { total_order_amount: order_amount, total_orders: 1 } },
-            { session }
+            { upsert: true, session }
         );
 
         await session.commitTransaction();
