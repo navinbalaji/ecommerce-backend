@@ -5,13 +5,19 @@ meta {
 }
 
 put {
-  url: {{baseUrl}}/order
+  url: {{baseUrl}}/order/:id
   body: json
   auth: inherit
 }
 
+params:path {
+  id: 66c79222df86462dcf785f9b
+}
+
 body:json {
   {
-    "email":"navin@gmail.com"
+    "is_delivered": true,
+    "is_cancelled": false,
+    "is_fullfilled": true
   }
 }
