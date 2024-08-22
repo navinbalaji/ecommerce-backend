@@ -12,6 +12,8 @@ import tokenExpirationMiddleware from "./middleware/jwtToken.js"
 import authRouter from './controllers/auth/auth.controller.js';
 import productRouter from './controllers/product/product.controller.js';
 import customerRouter from './controllers/customer/customer.controller.js';
+import orderRouter from './controllers/order/order.controller.js';
+import cartRouter from './controllers/cart/cart.controller.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -38,6 +40,8 @@ app.use(tokenExpirationMiddleware)
 
 app.use('/product', productRouter);
 app.use('/customer', customerRouter);
+app.use('/cart', cartRouter);
+app.use('/order', orderRouter);
 
 app.listen(PORT, () => {
     // init database

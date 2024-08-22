@@ -11,7 +11,7 @@ put {
 }
 
 params:path {
-  id: 66c4de9a5c53aa532f50b903
+  id: 66c76c3a05e2334e4efec1a2
 }
 
 body:json {
@@ -21,36 +21,36 @@ body:json {
     "product_type": "shirts",
     "status": "ACTIVE",
     "tags": [],
-    "variants": [
-      {
-        "title": "Shirt",
-        "color": "#FFFFFF",
-        "status": "ACTIVE",
-        "images": [
-          {
-            "position": 1,
-            "src": "https://google.com"
-          }
-        ],
-        "sizes": [
-          {
-            "size": "L",
-            "compare_at_price": 200,
-            "sku": "12345",
-            "inventory_quantity": 10,
-            "weight": 100,
-            "weight_unit": "GM"
-          },
-          {
-            "size": "M",
-            "compare_at_price": 200,
-            "sku": "123456",
-            "inventory_quantity": 10,
-            "weight": 100,
-            "weight_unit": "GM"
-          }
-        ]
-      }
-    ]
+    "variants": {
+      "title": "Shirt",
+      "color": "#FFFFFF",
+      "status": "ACTIVE",
+      "images": [
+        {
+          "position": 1,
+          "src": "https://google.com"
+        }
+      ],
+      "sizes": [
+        {
+          "size": "L",
+          "compare_at_price": 200,
+          "price": 100,
+          "sku": "12345",
+          "inventory_quantity": 10,
+          "weight": 100,
+          "weight_unit": "GM"
+        },
+        {
+          "size": "M",
+          "compare_at_price": 200,
+          "price": 200,
+          "sku": "123456",
+          "inventory_quantity": 10,
+          "weight": 100,
+          "weight_unit": "GM"
+        }
+      ]
+    }
   }
 }

@@ -11,12 +11,12 @@ import { cartCreateValidator } from '#src/validators/cart.validator.js';
 // utils
 import { validate } from '#common';
 
-const orderRouter = new Router();
+const cartRouter = new Router();
 
-orderRouter.get('/', getCart);
+cartRouter.get('/', getCart);
 
-orderRouter.post('/',validate(cartCreateValidator), createAndUpdateCart);
+cartRouter.post('/',validate(cartCreateValidator), createAndUpdateCart);
 
-orderRouter.put('/',validate(cartCreateValidator), createAndUpdateCart);
+cartRouter.put('/',validate(cartCreateValidator), createAndUpdateCart);
 
-export default orderRouter;
+export default cartRouter;

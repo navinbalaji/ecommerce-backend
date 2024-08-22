@@ -1,4 +1,5 @@
 import * as yup from 'yup';
+import {PRODUCT_SIZES} from "#constants"
 
 const cartProductValidator = yup.object().shape({
     product_id: yup.string().required('Product Id is required'),

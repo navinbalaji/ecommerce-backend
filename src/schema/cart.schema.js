@@ -22,7 +22,7 @@ const cartProductsSchema = new Schema({
 export const cartSchema = new Schema(
     {
         email: {
-            type: string,
+            type: String,
             index: true,
         },
         customer_id: {
