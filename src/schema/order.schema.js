@@ -1,15 +1,20 @@
-import { Schema, model } from 'mongoose';
+import { Schema, Types, model } from 'mongoose';
 import { customerAddressSchema } from '#schema/customer.schema.js';
 import { cartSchema } from '#schema/cart.schema.js';
 
 const orderSchema = new Schema(
     {
-        email: {
-            type: string,
+        order_number: {
+            type: Number,
             index: true,
         },
         order_amount: {
             type: Number,
+            index: true,
+        },
+        customer_id: {
+            type: Types.ObjectId,
+            ref: 'Customer',
             index: true,
         },
         cart: cartSchema,

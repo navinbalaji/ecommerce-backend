@@ -15,6 +15,11 @@ export const cartSchema = new Schema(
             type: string,
             index: true,
         },
+        customer_id: {
+            type: Types.ObjectId,
+            ref: 'Customer',
+            index: true,
+        },
         products: [cartProductsSchema],
     },
     {

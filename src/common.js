@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { nanoid } from 'nanoid/non-secure';
 
 export const successResponse = (message, data) => ({
     message,
@@ -23,12 +24,12 @@ export const validate = (schema) => async (req, res, next) => {
         await schema.validate(req.body, { abortEarly: false });
         next();
     } catch (err) {
-        return res
-            .status(400)
-            .json(
-                failureResponse(err.message || 'Something went wrong', {
-                    err: err.errors,
-                })
-            );
+        return res.status(400).json(
+            failureResponse(err.message || 'Something went wrong', {
+                err: err.errors,
+            })
+        );
     }
 };
+
+export const generateOrderNumber = () => nanoid(10, '1234567890');

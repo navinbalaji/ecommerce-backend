@@ -85,8 +85,6 @@ const productSchema = new Schema(
     },
     {
         timestamps: true,
-        // id: true,
-        // _id: false,
     }
 );
 
