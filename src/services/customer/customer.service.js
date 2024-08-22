@@ -6,6 +6,7 @@ import Customer from '#schema/customer.schema.js';
 // utils
 import { successResponse, failureResponse } from '#common';
 import { customerTransform } from '#transformers/customer.transformer.js';
+import {  ROLES } from '#src/constants.js';
 
 /**
  * Handles a GET request to get all customers.
@@ -23,6 +24,11 @@ export const getAllCustomers = async (req, res) => {
             {
                 $facet: {
                     data: [
+                        {
+                            $match: {
+                                role: ROLES.USER,
+                            },
+                        },
                         { $skip: Number(offset) || 0 },
                         { $limit: Number(limit) || 10 }, // default limit to 10 if not provided
                         { $sort: { _id: 1 } },
@@ -78,13 +84,11 @@ export const getCustomer = async (req, res) => {
             return res.status(404).json(failureResponse('Customer not found'));
         }
 
-        return res
-            .status(200)
-            .json(
-                successResponse('Customer fetched successfully', {
-                    customer: customerTransform(customer),
-                })
-            );
+        return res.status(200).json(
+            successResponse('Customer fetched successfully', {
+                customer: customerTransform(customer),
+            })
+        );
     } catch (err) {
         return res
             .status(400)
