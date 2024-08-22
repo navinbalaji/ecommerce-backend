@@ -13,7 +13,7 @@ import { validate } from '#common';
 
 const cartRouter = new Router();
 
-cartRouter.get('/', getCart);
+cartRouter.get('/:id', getCart);
 
 cartRouter.post('/',validate(cartCreateValidator), createAndUpdateCart);
 

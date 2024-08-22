@@ -1,5 +1,5 @@
 export const customerTransform = (customer) => ({
-    id: customer.id,
+    id: customer._id,
     name: customer.name,
     email: customer.email,
     phone_number: customer.phone_number,

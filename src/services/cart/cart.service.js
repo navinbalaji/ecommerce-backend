@@ -105,27 +105,42 @@ export const createAndUpdateCart = async (req, res) => {
 
 export const getCart = async (req, res) => {
     try {
-        const { id } = req.params;
-
-        if (!id) {
-            throw new Error('Customer Id is missing');
-        }
-        const cart = await Cart.findById({
-            customer_id: new Types.ObjectId(id),
-        })
-            .lean()
-            .exec();
-
-        if (!cart) {
-            return res.status(404).json(failureResponse('Cart not found'));
-        }
-
+      const { id } = req.params;
+  
+      if (!id) {
         return res
-            .status(200)
-            .json(successResponse('Cart fetched successfully', { cart }));
+          .status(400)
+          .json(failureResponse('Customer Id is required'));
+      }
+  
+      let cart = await Cart.findOne({ customer_id: new Types.ObjectId(id) })
+        .lean()
+        .exec();
+  
+      if (!cart) {
+        const customer = await Customer.findById(id).lean().exec();
+  
+        if (customer) {
+          cart = await Cart.create({
+            email: customer.email,
+            customer_id: customer._id,
+            products: [],
+            delivery_address: {},
+          });
+        } else {
+          return res
+            .status(404)
+            .json(failureResponse('Customer not found'));
+        }
+      }
+  
+      return res
+        .status(200)
+        .json(successResponse('Cart fetched successfully', { cart }));
     } catch (err) {
-        return res
-            .status(400)
-            .json(failureResponse(err?.message || 'something went wrong'));
+      return res
+        .status(500)
+        .json(failureResponse(err?.message || 'Something went wrong'));
     }
-};
+  };
+  
