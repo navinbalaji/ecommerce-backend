@@ -26,6 +26,6 @@ orderRouter.get('/:id', getOrderByOrderId);
 
 orderRouter.post('/',validate(orderCreate), createOrder);
 
-orderRouter.put('/:id',roleMiddleware(ROLES.ADMIN), validate(orderUpdate), updateOrder);
+orderRouter.put('/',roleMiddleware(ROLES.ADMIN), validate(orderUpdate), updateOrder);
 
 export default orderRouter;
