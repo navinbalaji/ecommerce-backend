@@ -82,7 +82,7 @@ export const createOrder = async (req, res) => {
         await Order.create(
             [
                 {
-                    order_id,
+                    order_id: order_id(),
                     order_amount,
                     customer_id: customerCart.customer_id,
                     cart: customerCart,
@@ -204,7 +204,7 @@ export const getOrderByOrderId = async (req, res) => {
         if (!id) {
             throw new Error('Order Id is missing');
         }
-        const order = await Order.findOne({ order_id:id }).lean().exec();
+        const order = await Order.findOne({ order_id: id }).lean().exec();
 
         if (!order) {
             return res.status(404).json(failureResponse('Order not found'));

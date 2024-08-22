@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { nanoid } from 'nanoid/non-secure';
+import { customAlphabet } from 'nanoid'
 
 export const successResponse = (message, data) => ({
     message,
@@ -32,4 +32,4 @@ export const validate = (schema) => async (req, res, next) => {
     }
 };
 
-export const generateOrderNumber = () => nanoid(10, '0123456789');
+export const generateOrderNumber = () =>  customAlphabet('1234567890', 10)
