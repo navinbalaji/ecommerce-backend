@@ -30,27 +30,50 @@ export const createOrder = async (req, res) => {
             throw new Error('Email ID required');
         }
 
-        const customerCart = await Cart.findOne({ email }).lean().session(session).exec();
+        const customerCart = await Cart.findOne({ email })
+            .lean()
+            .session(session)
+            .exec();
         if (!customerCart || customerCart.products.length === 0) {
             throw new Error(customerCart ? 'Cart is empty' : 'Cart not found');
         }
 
-        const productIds = customerCart.products.map(e => e.product_id).filter(Boolean);
-        const products = await Product.find({ _id: { $in: productIds } }).session(session).exec();
+        const productIds = customerCart.products
+            .map((e) => e.product_id)
+            .filter(Boolean);
+        const products = await Product.find({ _id: { $in: productIds } })
+            .session(session)
+            .exec();
 
         let order_amount = 0;
         const inventoryUpdates = [];
 
         for (const cart_product of customerCart.products) {
-            const product = products.find(e => e._id.toString() === cart_product.product_id.toString());
-            const sized_product = product?.variants.sizes.find(e => e.size === cart_product.size);
+            const product = products.find(
+                (e) => e._id.toString() === cart_product.product_id.toString()
+            );
+            const sized_product = product?.variants.sizes.find(
+                (e) => e.size === cart_product.size
+            );
 
-            if (!sized_product || sized_product.inventory_quantity === 0) {
-                throw new Error(`${product.name} of size ${cart_product.size} is out of stock`);
+            if (
+                !sized_product ||
+                sized_product.inventory_quantity === 0 ||
+                sized_product.inventory_quantity > cart_product.quantity
+            ) {
+                throw new Error(
+                    `${product.name} of size ${cart_product.size} is out of stock`
+                );
             }
 
             order_amount += cart_product.quantity * sized_product.price;
-            inventoryUpdates.push(reduceInventoryQuantity(product._id, sized_product.size, session));
+            inventoryUpdates.push(
+                reduceInventoryQuantity(
+                    product._id,
+                    sized_product.size,
+                    session
+                )
+            );
         }
 
         // Wait for all inventory updates to complete
@@ -80,12 +103,16 @@ export const createOrder = async (req, res) => {
         );
 
         await session.commitTransaction();
-        return res.status(200).json(successResponse('Order created successfully'));
+        return res
+            .status(200)
+            .json(successResponse('Order created successfully'));
     } catch (err) {
         if (session.inTransaction) {
             await session.abortTransaction();
         }
-        return res.status(400).json(failureResponse(err.message || 'Something went wrong'));
+        return res
+            .status(400)
+            .json(failureResponse(err.message || 'Something went wrong'));
     } finally {
         session.endSession();
     }
