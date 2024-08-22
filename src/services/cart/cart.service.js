@@ -42,29 +42,34 @@ export const createAndUpdateCart = async (req, res) => {
             .session(session)
             .exec();
 
-
-        const eligibleProductsForOrder = products.filter(
-            (cartProduct) => {
-                const sizedProduct = allProducts?.find(p=>p?._id?.toString()===cartProduct?.product_id?.toString())?.variants?.sizes?.find(
-                    (e) => e?.size === cartProduct?.size
-                );
-                return (
-                    sizedProduct &&
-                    sizedProduct.inventory_quantity > 0 &&
-                    sizedProduct.inventory_quantity >=
-                        (cartProduct ? cartProduct.quantity : 0)
-                );
-            }
-        );
+        const eligibleProductsForOrder = products.filter((cartProduct) => {
+            const sizedProduct = allProducts
+                ?.find(
+                    (p) =>
+                        p?._id?.toString() ===
+                        cartProduct?.product_id?.toString()
+                )
+                ?.variants?.sizes?.find((e) => e?.size === cartProduct?.size);
+            return (
+                sizedProduct &&
+                sizedProduct.inventory_quantity > 0 &&
+                sizedProduct.inventory_quantity >=
+                    (cartProduct ? cartProduct.quantity : 0)
+            );
+        });
 
         const cartUpdateData = {
             email,
             customer_id: customer._id,
             products: eligibleProductsForOrder,
-            delivery_address: new Boolean(is_default_address)
+            delivery_address: is_default_address
                 ? customer.address
                 : new_delivery_address,
         };
+
+        if (!cartUpdateData.delivery_address) {
+            throw new Error('Please add the address');
+        }
 
         let cartData;
         const customerCart = await Cart.findOne({ email })
@@ -103,42 +108,41 @@ export const createAndUpdateCart = async (req, res) => {
 
 export const getCart = async (req, res) => {
     try {
-      const { id } = req.params;
-  
-      if (!id) {
-        return res
-          .status(400)
-          .json(failureResponse('Customer Id is required'));
-      }
-  
-      let cart = await Cart.findOne({ customer_id: new Types.ObjectId(id) })
-        .lean()
-        .exec();
-  
-      if (!cart) {
-        const customer = await Customer.findById(id).lean().exec();
-  
-        if (customer) {
-          cart = await Cart.create({
-            email: customer.email,
-            customer_id: customer._id,
-            products: [],
-            delivery_address: {},
-          });
-        } else {
-          return res
-            .status(404)
-            .json(failureResponse('Customer not found'));
+        const { id } = req.params;
+
+        if (!id) {
+            return res
+                .status(400)
+                .json(failureResponse('Customer Id is required'));
         }
-      }
-  
-      return res
-        .status(200)
-        .json(successResponse('Cart fetched successfully', { cart }));
+
+        let cart = await Cart.findOne({ customer_id: new Types.ObjectId(id) })
+            .lean()
+            .exec();
+
+        if (!cart) {
+            const customer = await Customer.findById(id).lean().exec();
+
+            if (customer) {
+                cart = await Cart.create({
+                    email: customer.email,
+                    customer_id: customer._id,
+                    products: [],
+                    delivery_address: {},
+                });
+            } else {
+                return res
+                    .status(404)
+                    .json(failureResponse('Customer not found'));
+            }
+        }
+
+        return res
+            .status(200)
+            .json(successResponse('Cart fetched successfully', { cart }));
     } catch (err) {
-      return res
-        .status(500)
-        .json(failureResponse(err?.message || 'Something went wrong'));
+        return res
+            .status(500)
+            .json(failureResponse(err?.message || 'Something went wrong'));
     }
-  };
-  
+};
