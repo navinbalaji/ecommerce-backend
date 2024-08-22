@@ -36,25 +36,23 @@ export const createAndUpdateCart = async (req, res) => {
         }
 
         const productIds = products.map((e) => e.product_id).filter(Boolean);
-        const availableProducts = await Product.find({
+        const allProducts = await Product.find({
             _id: { $in: productIds },
         })
             .session(session)
             .exec();
 
-        const eligibleProductsForOrder = availableProducts.filter(
+
+        const eligibleProductsForOrder = products.filter(
             (cartProduct) => {
-                const sizedProduct = cartProduct.variants.sizes.find(
-                    (e) => e.size === cartProduct.size
-                );
-                const customerCartProduct = products.find(
-                    (e) => e.product_id === cartProduct._id.toString()
+                const sizedProduct = allProducts?.find(p=>p?._id?.toString()===cartProduct?.product_id?.toString())?.variants?.sizes?.find(
+                    (e) => e?.size === cartProduct?.size
                 );
                 return (
                     sizedProduct &&
                     sizedProduct.inventory_quantity > 0 &&
                     sizedProduct.inventory_quantity >=
-                        (customerCartProduct ? customerCartProduct.quantity : 0)
+                        (cartProduct ? cartProduct.quantity : 0)
                 );
             }
         );

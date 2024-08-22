@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import {PRODUCT_SIZES} from "#constants"
+import { PRODUCT_SIZES } from '#constants';
 
 const cartProductValidator = yup.object().shape({
     product_id: yup.string().required('Product Id is required'),
@@ -8,13 +8,13 @@ const cartProductValidator = yup.object().shape({
 });
 
 const deliveryAddressValidator = yup.object().shape({
-    line1: yup.string().notRequired(),
+    line1: yup.string().required("Address Line 1 is required"),
     line2: yup.string().notRequired(),
     landmark: yup.string().notRequired(),
-    city: yup.string().notRequired(),
-    state: yup.string().notRequired(),
-    country: yup.string().notRequired(),
-    pincode: yup.number().notRequired(),
+    city: yup.string().required("City is required"),
+    state: yup.string().required("State is required"),
+    country: yup.string().required("Country is required"),
+    pincode: yup.number().required("Pincode is required"),
 });
 
 export const cartCreateValidator = yup.object().shape({
@@ -24,11 +24,11 @@ export const cartCreateValidator = yup.object().shape({
         .array()
         .of(cartProductValidator)
         .min(1, 'Minimum 1 product is required')
-        .required('Products is required'),
-    new_delivery_address: yup.object(deliveryAddressValidator).when('is_default_address', {
+        .required('Products are required'),
+    new_delivery_address: yup.object().when('is_default_address', {
         is: false,
-        then: yup.object(deliveryAddressValidator).required('Delivery address is required'),
-        otherwise: yup.object(deliveryAddressValidator).notRequired(),
+        then: () => deliveryAddressValidator.required('Delivery address is required'),
+        otherwise: () => yup.object().notRequired(),
     }),
     is_default_address: yup
         .boolean()

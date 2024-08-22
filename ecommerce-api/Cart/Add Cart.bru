@@ -1,0 +1,27 @@
+meta {
+  name: Add Cart
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/cart
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "navin@gmail.com",
+    "customer_id": "66c7769de74c2d144164a6ec",
+    "products": [
+      {
+        "product_id": "66c76c3a05e2334e4efec1a2",
+        "size": "L",
+        "quantity": 1
+      }
+    ],
+    "new_delivery_address": {},
+    "is_default_address": true
+  }
+}
