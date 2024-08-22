@@ -134,3 +134,118 @@ const reduceInventoryQuantity = async (productId, size, session) => {
         }
     ).exec();
 };
+
+/**
+ * Handles a GET request to get all orders.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response}
+ */
+
+export const getAllOrders = async (req, res) => {
+    try {
+        const { offset, limit } = req.query;
+
+        const pipeline = [
+            {
+                $facet: {
+                    data: [
+                        { $skip: Number(offset) || 0 },
+                        { $limit: Number(limit) || 10 }, // default limit to 10 if not provided
+                        { $sort: { _id: 1 } },
+                    ],
+                    totalCount: [
+                        { $count: 'total' }, // count the total number of documents
+                    ],
+                },
+            },
+            {
+                $project: {
+                    data: 1,
+                    totalCount: { $arrayElemAt: ['$totalCount.total', 0] }, // extract the total count from the array
+                },
+            },
+        ];
+
+        const [orders] = await Order.aggregate(pipeline);
+
+        const { data, totalCount } = orders; // extract the data and total count
+
+        return res.status(200).json(
+            successResponse('Orders fetched successfully', {
+                orders: data,
+                totalCount,
+            })
+        );
+    } catch (err) {
+        return res
+            .status(400)
+            .json(failureResponse(err?.message || 'something went wrong'));
+    }
+};
+
+/**
+ * Handles a GET request to get a order.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response}
+ */
+
+export const getOrderByOrderId = async (req, res) => {
+    try {
+        const { order_id } = req.params;
+
+        if (!id) {
+            throw new Error('Order Id is missing');
+        }
+        const order = await Order.findOne({ order_id }).lean().exec();
+
+        if (!order) {
+            return res.status(404).json(failureResponse('Order not found'));
+        }
+
+        return res
+            .status(200)
+            .json(successResponse('Order fetched successfully', { product }));
+    } catch (err) {
+        return res
+            .status(400)
+            .json(failureResponse(err?.message || 'something went wrong'));
+    }
+};
+
+/**
+ * Handles a PUT request to update a order.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response}
+ */
+
+export const updateOrder = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const orderData = req.body;
+
+        if (!id) {
+            throw new Error('Order Id is missing');
+        }
+        const order = await Order.findByIdAndUpdate(id, {
+            ...orderData,
+        }).exec();
+
+        if (!order) {
+            throw new Error('Order update failed');
+        }
+
+        return res
+            .status(200)
+            .json(successResponse('Order updated successfully'));
+    } catch (err) {
+        return res
+            .status(400)
+            .json(failureResponse(err?.message || 'something went wrong'));
+    }
+};

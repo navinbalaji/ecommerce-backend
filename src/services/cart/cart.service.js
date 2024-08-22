@@ -1,6 +1,6 @@
 'use strict';
 
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 // schema
 import Customer from '#schema/customer.schema.js';
@@ -11,19 +11,20 @@ import Cart from '#schema/cart.schema.js';
 import { successResponse, failureResponse } from '#common';
 
 /**
- * Handles a POST request to create a new order.
+ * Handles a POST request to create a new cart.
  *
  * @param {Request} req
  * @param {Response} res
  * @returns {Response}
  */
 
-export const createCart = async (req, res) => {
+export const createAndUpdateCart = async (req, res) => {
     const session = await mongoose.startSession();
     try {
         session.startTransaction();
 
-        const { email, is_default_address, new_delivery_address, products } = req.body;
+        const { email, is_default_address, new_delivery_address, products } =
+            req.body;
 
         if (!email) {
             return res.status(400).json(failureResponse('Email ID required'));
@@ -34,26 +35,43 @@ export const createCart = async (req, res) => {
             return res.status(404).json(failureResponse('Customer not found'));
         }
 
-        const productIds = products.map(e => e.product_id).filter(Boolean);
-        const availableProducts = await Product.find({ _id: { $in: productIds } }).session(session).exec();
+        const productIds = products.map((e) => e.product_id).filter(Boolean);
+        const availableProducts = await Product.find({
+            _id: { $in: productIds },
+        })
+            .session(session)
+            .exec();
 
-        const eligibleProductsForOrder = availableProducts.filter(cartProduct => {
-            const sizedProduct = cartProduct.variants.sizes.find(e => e.size === cartProduct.size);
-            const customerCartProduct = products.find(e => e.product_id === cartProduct._id.toString());
-            return sizedProduct && 
-                   sizedProduct.inventory_quantity > 0 && 
-                   sizedProduct.inventory_quantity >= (customerCartProduct ? customerCartProduct.quantity : 0);
-        });
+        const eligibleProductsForOrder = availableProducts.filter(
+            (cartProduct) => {
+                const sizedProduct = cartProduct.variants.sizes.find(
+                    (e) => e.size === cartProduct.size
+                );
+                const customerCartProduct = products.find(
+                    (e) => e.product_id === cartProduct._id.toString()
+                );
+                return (
+                    sizedProduct &&
+                    sizedProduct.inventory_quantity > 0 &&
+                    sizedProduct.inventory_quantity >=
+                        (customerCartProduct ? customerCartProduct.quantity : 0)
+                );
+            }
+        );
 
         const cartUpdateData = {
             email,
             customer_id: customer._id,
             products: eligibleProductsForOrder,
-            delivery_address: is_default_address ? customer.address : new_delivery_address,
+            delivery_address: is_default_address
+                ? customer.address
+                : new_delivery_address,
         };
 
         let cartData;
-        const customerCart = await Cart.findOne({ email }).session(session).exec();
+        const customerCart = await Cart.findOne({ email })
+            .session(session)
+            .exec();
         if (customerCart) {
             customerCart.products = eligibleProductsForOrder;
             cartData = await customerCart.save({ session });
@@ -62,13 +80,52 @@ export const createCart = async (req, res) => {
         }
 
         await session.commitTransaction();
-        return res.status(200).json(successResponse('Cart created successfully', { cartData }));
+        return res
+            .status(200)
+            .json(successResponse('Cart created successfully', { cartData }));
     } catch (err) {
         if (session.inTransaction) {
             await session.abortTransaction();
         }
-        return res.status(500).json(failureResponse(err.message || 'Something went wrong'));
+        return res
+            .status(500)
+            .json(failureResponse(err.message || 'Something went wrong'));
     } finally {
         session.endSession();
+    }
+};
+
+/**
+ * Handles a GET request to get a cart.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response}
+ */
+
+export const getCart = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!id) {
+            throw new Error('Customer Id is missing');
+        }
+        const cart = await Cart.findById({
+            customer_id: new Types.ObjectId(id),
+        })
+            .lean()
+            .exec();
+
+        if (!cart) {
+            return res.status(404).json(failureResponse('Cart not found'));
+        }
+
+        return res
+            .status(200)
+            .json(successResponse('Cart fetched successfully', { cart }));
+    } catch (err) {
+        return res
+            .status(400)
+            .json(failureResponse(err?.message || 'something went wrong'));
     }
 };

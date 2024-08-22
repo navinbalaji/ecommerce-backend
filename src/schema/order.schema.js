@@ -4,7 +4,7 @@ import { cartSchema } from '#schema/cart.schema.js';
 
 const orderSchema = new Schema(
     {
-        order_number: {
+        order_id: {
             type: Number,
             index: true,
         },
