@@ -1,0 +1,17 @@
+meta {
+  name: Update Order
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/order
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email":"navin@gmail.com"
+  }
+}

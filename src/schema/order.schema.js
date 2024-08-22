@@ -5,7 +5,7 @@ import { cartSchema } from '#schema/cart.schema.js';
 const orderSchema = new Schema(
     {
         order_id: {
-            type: Number,
+            type: String,
             index: true,
         },
         order_amount: {

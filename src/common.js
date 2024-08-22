@@ -32,4 +32,4 @@ export const validate = (schema) => async (req, res, next) => {
     }
 };
 
-export const generateOrderNumber = () => nanoid(10, '1234567890');
+export const generateOrderNumber = () => nanoid(10, '0123456789');

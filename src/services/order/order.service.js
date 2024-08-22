@@ -78,11 +78,11 @@ export const createOrder = async (req, res) => {
         // Wait for all inventory updates to complete
         await Promise.all(inventoryUpdates);
 
-        const order_number = generateOrderNumber();
+        const order_id = generateOrderNumber();
         await Order.create(
             [
                 {
-                    order_number,
+                    order_id,
                     order_amount,
                     customer_id: customerCart.customer_id,
                     cart: customerCart,
@@ -199,12 +199,12 @@ export const getAllOrders = async (req, res) => {
 
 export const getOrderByOrderId = async (req, res) => {
     try {
-        const { order_id } = req.params;
+        const { id } = req.params;
 
         if (!id) {
             throw new Error('Order Id is missing');
         }
-        const order = await Order.findOne({ order_id }).lean().exec();
+        const order = await Order.findOne({ order_id:id }).lean().exec();
 
         if (!order) {
             return res.status(404).json(failureResponse('Order not found'));
@@ -212,7 +212,7 @@ export const getOrderByOrderId = async (req, res) => {
 
         return res
             .status(200)
-            .json(successResponse('Order fetched successfully', { product }));
+            .json(successResponse('Order fetched successfully', { order }));
     } catch (err) {
         return res
             .status(400)
