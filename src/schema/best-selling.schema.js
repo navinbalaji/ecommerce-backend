@@ -5,10 +5,12 @@ export const bestSellingSchema = new Schema(
     {
         product_id: {
             type: Types.ObjectId,
+            index:true,
             required:true
         },
         quantity: {
             type: Number,
+            index:true,
             required:true
         },
     },
