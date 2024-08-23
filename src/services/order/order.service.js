@@ -93,6 +93,7 @@ export const createOrder = async (req, res) => {
                     is_delivered: false,
                     is_cancelled: false,
                     is_fullfilled: true,
+                    is_payment_completed:false,
                     delivery_address: customerCart.delivery_address,
                 },
             ],

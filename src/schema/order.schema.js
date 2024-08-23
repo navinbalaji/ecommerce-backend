@@ -30,6 +30,10 @@ const orderSchema = new Schema(
             type: Boolean,
             index: true,
         },
+        is_payment_completed:{
+            type: Boolean,
+            index: true,  
+        },
         delivery_address: customerAddressSchema,
     },
     {
