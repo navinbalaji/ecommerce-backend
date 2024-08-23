@@ -72,7 +72,7 @@ export const register = async (req, res) => {
         }
 
         // Create a new customer
-        const customer = await Customer.create(
+        const [customer] = await Customer.create(
             [
                 {
                     name,

@@ -1,11 +1,5 @@
 import * as yup from 'yup';
 
-
-
-export const orderCreate = yup.object().shape({
-    customer_id: yup.string().required("Customer Id is required"),
-})
-
 export const orderUpdate= yup.object().shape({
     is_delivered: yup.boolean().notRequired(),
     is_cancelled: yup.boolean().notRequired(),

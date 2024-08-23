@@ -25,7 +25,7 @@ export const createOrder = async (req, res) => {
     session.startTransaction();
 
     try {
-        const { customer_id } = req.body;
+        const customer_id = req?.user?.cid;
 
         if (!customer_id) {
             throw new Error('Customer ID required');
@@ -72,14 +72,14 @@ export const createOrder = async (req, res) => {
             order_amount += cart_product.quantity * sized_product.price;
             inventoryUpdates.push({
                 product_id: product._id,
-                color:cart_product?.color,
+                color: cart_product?.color,
                 size: sized_product.size,
             });
         }
 
         const order_number = generateOrderNumber()();
 
-        const order = await Order.create(
+        const [order] = await Order.create(
             [
                 {
                     order_id: order_number,
@@ -95,11 +95,11 @@ export const createOrder = async (req, res) => {
             ],
             { session }
         );
-
+        
         const stripe_client_secret = await generatePayment(
             order_amount,
             customerCart.email,
-            order._id,
+            order._id.toString(),
             order_number,
             order_number,
             customerCart.customer_id
@@ -116,6 +116,14 @@ export const createOrder = async (req, res) => {
                 is_webhook_delivered: false,
             },
             { upsert: true, session }
+        );
+
+        // Remove the cart
+        await Cart.deleteOne(
+            {
+                customer_id: Types.ObjectId.createFromHexString(customer_id),
+            },
+            { session }
         );
 
         await session.commitTransaction();
@@ -147,7 +155,7 @@ const generatePayment = async (
     customerId
 ) => {
     try {
-        if (!process.env.BASE_URL || !process.env.STRIPE_SECRET_KEY) {
+        if (!process.env.STRIPE_SECRET_KEY) {
             throw new Error('Payment Failed CODE 1');
         }
         const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -163,7 +171,6 @@ const generatePayment = async (
                 enabled: true,
             },
             receipt_email: email,
-            return_url: `${process.env.BASE_URL}/stripe/webhook`,
             metadata: {
                 orderId,
                 customerId,

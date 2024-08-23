@@ -12,7 +12,7 @@ import {
 } from '#services/order/order.service.js';
 
 // validators
-import { orderCreate,orderUpdate } from '#src/validators/order.validator.js';
+import { orderUpdate } from '#src/validators/order.validator.js';
 
 // utils
 import { validate } from '#common';
@@ -27,7 +27,7 @@ orderRouter.get('/customer/:id', getCustomerOrders);
 
 orderRouter.get('/:id', getOrderByOrderId);
 
-orderRouter.post('/',validate(orderCreate), createOrder);
+orderRouter.post('/', createOrder);
 
 orderRouter.put('/:id',roleMiddleware(ROLES.ADMIN), validate(orderUpdate), updateOrder);
 

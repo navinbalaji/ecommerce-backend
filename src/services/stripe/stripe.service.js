@@ -69,14 +69,6 @@ export const handleWebhook = async (req, res) => {
             )
         );
 
-        // Remove the cart
-        await Cart.deleteOne(
-            {
-                customer_id: Types.ObjectId.createFromHexString(customerId),
-            },
-            { session }
-        );
-
         // Update Analytics
         await Analytics.findOneAndUpdate(
             { name: 'dashboard' },

@@ -90,7 +90,7 @@ export const createAndUpdateCart = async (req, res) => {
             customerCart.products = eligibleProductsForOrder;
             cartData = await customerCart.save({ session });
         } else {
-            cartData = await Cart.create([cartUpdateData], { session });
+            [cartData] = await Cart.create([cartUpdateData], { session });
         }
 
         await session.commitTransaction();
@@ -119,7 +119,7 @@ export const createAndUpdateCart = async (req, res) => {
 
 export const getCart = async (req, res) => {
     try {
-        const { id } = req.params;
+        const id = req?.user?.cid;
 
         if (!id) {
             return res
