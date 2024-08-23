@@ -65,6 +65,12 @@ export const register = async (req, res) => {
 
         const { name, email, password, phone_number, date_of_birth } = req.body;
 
+        const customerExists= await Customer.exists({email}).exec()
+
+        if(customerExists){
+            throw new Error("Customer already exists")
+        }
+
         // Create a new customer
         const customer = await Customer.create(
             [
