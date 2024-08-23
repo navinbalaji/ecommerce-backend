@@ -57,7 +57,7 @@ export const createAndUpdateCart = async (req, res) => {
                         p?._id?.toString() ===
                         cartProduct?.product_id?.toString()
                 )
-                ?.variants?.sizes?.find((e) => e?.size === cartProduct?.size);
+                ?.variants.filter((v)=>v?.color===cartProduct?.color)?.sizes?.find((e) => e?.size === cartProduct?.size);
             return (
                 sizedProduct &&
                 sizedProduct.inventory_quantity > 0 &&

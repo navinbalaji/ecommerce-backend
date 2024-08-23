@@ -55,7 +55,7 @@ export const createOrder = async (req, res) => {
             const product = products.find(
                 (e) => e._id.toString() === cart_product.product_id.toString()
             );
-            const sized_product = product?.variants.sizes.find(
+            const sized_product = product?.variants?.filter((v)=>v?.color===cart_product?.color)?.sizes?.find(
                 (e) => e.size === cart_product.size
             );
 
@@ -146,7 +146,7 @@ const reduceInventoryQuantity = async (productId, size, session) => {
             'variants.sizes.inventory_quantity': { $gt: 0 },
         },
         {
-            $inc: { 'variants.sizes.$.inventory_quantity': -1 },
+            $inc: { 'variants.$.sizes.$.inventory_quantity': -1 },
         },
         {
             new: true,

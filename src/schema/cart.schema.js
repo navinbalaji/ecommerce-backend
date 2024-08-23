@@ -12,6 +12,25 @@ const cartProductsSchema = new Schema({
         enum: PRODUCT_SIZES,
         required:true
     },
+    product_name:{
+        type: String,
+        required:true  
+    },
+    product_sub_name:{
+        type: String,
+    },
+    product_image:{
+        type: String,
+        required:true  
+    },
+    price: {
+        type: Number,
+        required:true
+    },
+    color:{
+        type: String,
+        required:true 
+    },
     quantity: {
         type: Number,
         min:1,

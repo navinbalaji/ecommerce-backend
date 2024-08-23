@@ -3,6 +3,11 @@ import { PRODUCT_SIZES } from '#constants';
 
 const cartProductValidator = yup.object().shape({
     product_id: yup.string().required('Product Id is required'),
+    product_name: yup.string().required('Product Name is required'),
+    product_sub_name: yup.string().notRequired(),
+    product_image: yup.string().required('Product Image is required'),
+    color: yup.string().required('Product Color is required'),
+    price: yup.number().required('Product Price is required'),
     size: yup.mixed().oneOf(PRODUCT_SIZES).required('Product Size is required'),
     quantity: yup.number().min(1).required('Product Quantity is required'),
 });
