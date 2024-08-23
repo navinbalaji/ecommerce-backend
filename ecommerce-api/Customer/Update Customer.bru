@@ -5,28 +5,28 @@ meta {
 }
 
 put {
-  url: {{baseUrl}}/product/:id
+  url: {{baseUrl}}/customer/:id
   body: json
   auth: inherit
 }
 
 params:path {
-  id: 66c4de9a5c53aa532f50b903
+  id: 66c373fcbad4219b690ed115
 }
 
 body:json {
   {
-    "name": "",
-    "phone_number": "",
-    "date_of_birth": "",
+    "name": "Navin",
+    "phone_number": "1234567890",
+    "date_of_birth": "11/9/1999",
     "address": {
-      "line1": "",
-      "line2": "",
-      "landmark": "",
-      "city": "",
-      "state": "",
-      "country": "",
-      "pincode": ""
+      "line1": "test",
+      "line2": "test",
+      "landmark": "test",
+      "city": "test",
+      "state": "test",
+      "country": "test",
+      "pincode": 123456
     }
   }
 }

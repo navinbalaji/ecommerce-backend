@@ -38,7 +38,7 @@ export const createOrder = async (req, res) => {
             .exec();
 
         if (!customerCart || customerCart.products.length === 0) {
-            throw new Error(customerCart ? 'Cart is empty' : 'Cart not found');
+            throw new Error('Cart is empty');
         }
 
         const productIds = customerCart.products
@@ -55,7 +55,7 @@ export const createOrder = async (req, res) => {
             const product = products.find(
                 (e) => e._id.toString() === cart_product.product_id.toString()
             );
-            const sized_product = product?.variants?.filter((v)=>v?.color===cart_product?.color)?.sizes?.find(
+            const sized_product = product?.variants?.find((v)=>v?.color===cart_product?.color)?.sizes?.find(
                 (e) => e.size === cart_product.size
             );
 
@@ -142,17 +142,17 @@ const reduceInventoryQuantity = async (productId, size, session) => {
     return Product.findOneAndUpdate(
         {
             _id: productId,
-            'variants.sizes.size': size,
-            'variants.sizes.inventory_quantity': { $gt: 0 },
+            'variants.sizes': { $elemMatch: { size: size, inventory_quantity: { $gt: 0 } } }
         },
         {
-            $inc: { 'variants.$.sizes.$.inventory_quantity': -1 },
+            $inc: { 'variants.$[].sizes.$[s].inventory_quantity': -1 }
         },
         {
             new: true,
             session: session,
+            arrayFilters: [{ 's.size': size }]
         }
-    ).exec();
+    ).exec();     
 };
 
 /**
@@ -269,3 +269,67 @@ export const updateOrder = async (req, res) => {
             .json(failureResponse(err?.message || 'something went wrong'));
     }
 };
+
+
+/**
+ * Handles a GET request to get all customer orders.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response}
+ */
+
+export const getCustomerOrders = async (req, res) => {
+    try {
+        
+        const { offset, limit } = req.query;
+
+        const { id } = req.params;
+
+        if (!id) {
+            throw new Error('Customer Id is missing');
+        }
+
+        const pipeline = [
+            {
+                $facet: {
+                    data: [
+                        {
+                            $match:{
+                                customer_id:Types.ObjectId.createFromHexString(id)
+                            }
+                        },
+                        { $skip: Number(offset) || 0 },
+                        { $limit: Number(limit) || 10 }, // default limit to 10 if not provided
+                        { $sort: { _id: 1 } },
+                    ],
+                    totalCount: [
+                        { $count: 'total' }, // count the total number of documents
+                    ],
+                },
+            },
+            {
+                $project: {
+                    data: 1,
+                    totalCount: { $arrayElemAt: ['$totalCount.total', 0] }, // extract the total count from the array
+                },
+            },
+        ];
+
+        const [orders] = await Order.aggregate(pipeline);
+
+        const { data, totalCount } = orders; // extract the data and total count
+
+        return res.status(200).json(
+            successResponse('Customer Orders fetched successfully', {
+                customer_orders: data,
+                totalCount,
+            })
+        );
+    } catch (err) {
+        return res
+            .status(400)
+            .json(failureResponse(err?.message || 'something went wrong'));
+    }
+};
+

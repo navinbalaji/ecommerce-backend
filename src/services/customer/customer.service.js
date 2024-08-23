@@ -117,7 +117,7 @@ export const updateCustomer = async (req, res) => {
         }).exec();
 
         if (!customer) {
-            throw new Error('Customer update failed');
+            throw new Error('Customer not found');
         }
 
         return res

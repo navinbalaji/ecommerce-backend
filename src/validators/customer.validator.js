@@ -17,7 +17,10 @@ export const registerSchema = yup.object().shape({
         .string()
         .email('Invalid email address')
         .required('Email is required'),
-    password: yup.string().required('Password is required'),
+    password: yup
+        .string()
+        .min(8, 'Password must be at least 8 characters')
+        .required('Password is required'),
     phone_number: yup.string().required('Phone Number is required'),
     date_of_birth: yup.date().required('Date of Birth is required'),
     address: yup.object().shape({

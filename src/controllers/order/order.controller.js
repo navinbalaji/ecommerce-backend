@@ -7,7 +7,8 @@ import {
     createOrder,
     getAllOrders,
     getOrderByOrderId,
-    updateOrder
+    updateOrder,
+    getCustomerOrders
 } from '#services/order/order.service.js';
 
 // validators
@@ -21,6 +22,8 @@ import roleMiddleware from '#middleware/roleMiddleware.js';
 const orderRouter = new Router();
 
 orderRouter.get('/all',roleMiddleware(ROLES.ADMIN), getAllOrders);
+
+orderRouter.get('/customer/:id', getCustomerOrders);
 
 orderRouter.get('/:id', getOrderByOrderId);
 

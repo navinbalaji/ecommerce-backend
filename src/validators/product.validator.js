@@ -8,8 +8,8 @@ import {
 
 const variantSizeSchema = yup.object().shape({
     size: yup.mixed().oneOf(PRODUCT_SIZES).required('Product Size is required'),
-    compare_at_price: yup.number().required('Compare Price is required'),
-    price: yup.number().required('Product Price is required'),
+    compare_at_price: yup.number().min(1).required('Compare Price is required'),
+    price: yup.number().min(1).required('Product Price is required'),
     sku: yup.string().required('SKU is required'),
     inventory_quantity: yup.number().required('Inventory Quantity is required'),
     weight: yup.number().required('Weight is required'),
@@ -26,7 +26,10 @@ const variantImageSchema = yup.object().shape({
 
 const variantSchema = yup.object().shape({
     title: yup.string().required('Title is required'),
-    color: yup.string().required('Color is required'),
+    color: yup
+        .string()
+        .matches(/^#([A-Fa-f0-9]{6})$/, 'Color must be a valid 6-character hexadecimal color code')
+        .required('Color is required'),
     status: yup
         .mixed()
         .oneOf(PRODUCT_STATUS)
