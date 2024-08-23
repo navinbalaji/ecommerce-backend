@@ -3,7 +3,7 @@ import * as yup from 'yup';
 
 
 export const orderCreate = yup.object().shape({
-    email: yup.string().email().required("Email is required"),
+    customer_id: yup.string().required("Customer Id is required"),
 })
 
 export const orderUpdate= yup.object().shape({
