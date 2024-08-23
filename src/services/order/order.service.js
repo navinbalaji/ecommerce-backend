@@ -1,12 +1,13 @@
 'use strict';
 
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 // schema
 import Order from '#schema/order.schema.js';
 import Product from '#schema/product.schema.js';
 import Cart from '#schema/cart.schema.js';
 import Analytics from '#schema/analytics.schema.js';
+import BestSelling from '#schema/best-selling.schema.js';
 
 // utils
 import { successResponse, failureResponse, generateOrderNumber } from '#common';
@@ -95,14 +96,22 @@ export const createOrder = async (req, res) => {
             { session }
         );
 
-        // remove the cart
+        // Remove the cart
         await Cart.deleteOne({ email }, { session });
 
         // TODO: Send order email
 
+        // Update Analytics
         await Analytics.findOneAndUpdate(
             { name: 'dashboard' },
             { $inc: { total_order_amount: order_amount, total_orders: 1 } },
+            { upsert: true, session }
+        );
+
+        // Update BestSelling
+        await BestSelling.updateMany(
+            { product_id: { $in: productIds.map(id => Types.ObjectId(id)) } },
+            { $inc: { quantity: 1 } },
             { upsert: true, session }
         );
 
@@ -111,7 +120,7 @@ export const createOrder = async (req, res) => {
             .status(200)
             .json(successResponse('Order created successfully'));
     } catch (err) {
-        if (session.inTransaction) {
+        if (session.inTransaction()) {
             await session.abortTransaction();
         }
         return res
