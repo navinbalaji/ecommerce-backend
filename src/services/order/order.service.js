@@ -1,13 +1,13 @@
 'use strict';
 
 import mongoose, { Types } from 'mongoose';
+import Stripe from 'stripe';
 
 // schema
 import Order from '#schema/order.schema.js';
 import Product from '#schema/product.schema.js';
 import Cart from '#schema/cart.schema.js';
-import Analytics from '#schema/analytics.schema.js';
-import BestSelling from '#schema/best-selling.schema.js';
+import InventoryReduce from '#schema/inventory-reduce.schema.js';
 
 // utils
 import { successResponse, failureResponse, generateOrderNumber } from '#common';
@@ -55,9 +55,9 @@ export const createOrder = async (req, res) => {
             const product = products.find(
                 (e) => e._id.toString() === cart_product.product_id.toString()
             );
-            const sized_product = product?.variants?.find((v)=>v?.color===cart_product?.color)?.sizes?.find(
-                (e) => e.size === cart_product.size
-            );
+            const sized_product = product?.variants
+                ?.find((v) => v?.color === cart_product?.color)
+                ?.sizes?.find((e) => e.size === cart_product.size);
 
             if (
                 !sized_product ||
@@ -70,62 +70,63 @@ export const createOrder = async (req, res) => {
             }
 
             order_amount += cart_product.quantity * sized_product.price;
-            inventoryUpdates.push(
-                reduceInventoryQuantity(
-                    product._id,
-                    sized_product.size,
-                    session
-                )
-            );
+            inventoryUpdates.push({
+                product_id: product._id,
+                color:cart_product?.color,
+                size: sized_product.size,
+            });
         }
 
-        // Wait for all inventory updates to complete
-        await Promise.all(inventoryUpdates);
+        const order_number = generateOrderNumber()();
 
-        const order_id = generateOrderNumber();
-        await Order.create(
+        const order = await Order.create(
             [
                 {
-                    order_id: order_id(),
+                    order_id: order_number,
                     order_amount,
                     customer_id: customerCart.customer_id,
                     cart: customerCart,
                     is_delivered: false,
                     is_cancelled: false,
                     is_fullfilled: true,
-                    is_payment_completed:false,
+                    is_payment_completed: false,
                     delivery_address: customerCart.delivery_address,
                 },
             ],
             { session }
         );
 
-        // Remove the cart
-        await Cart.deleteOne(
-            { customer_id: Types.ObjectId.createFromHexString(customer_id) },
-            { session }
+        const stripe_client_secret = await generatePayment(
+            order_amount,
+            customerCart.email,
+            order._id,
+            order_number,
+            order_number,
+            customerCart.customer_id
         );
 
-        // TODO: Send order email
-
-        // Update Analytics
-        await Analytics.findOneAndUpdate(
-            { name: 'dashboard' },
-            { $inc: { total_order_amount: order_amount, total_orders: 1 } },
-            { upsert: true, session }
-        );
-
-        // Update BestSelling
-        await BestSelling.updateMany(
-            { product_id: { $in: productIds.map((id) => id).filter(Boolean) } },
-            { $inc: { quantity: 1 } },
+        await InventoryReduce.findOneAndUpdate(
+            { order_id: order._id, order_number: order_number },
+            {
+                order_id: order._id,
+                order_number: order_number,
+                inventory_products: inventoryUpdates,
+                customer_id,
+                order_amount,
+                is_webhook_delivered: false,
+            },
             { upsert: true, session }
         );
 
         await session.commitTransaction();
-        return res
-            .status(200)
-            .json(successResponse('Order created successfully'));
+
+        return res.status(200).json(
+            successResponse('Order created successfully', {
+                stripe_client_secret,
+                order_id: order._id,
+                order_number,
+            })
+        );
     } catch (err) {
         if (session.inTransaction()) {
             await session.abortTransaction();
@@ -138,21 +139,42 @@ export const createOrder = async (req, res) => {
     }
 };
 
-const reduceInventoryQuantity = async (productId, size, session) => {
-    return Product.findOneAndUpdate(
-        {
-            _id: productId,
-            'variants.sizes': { $elemMatch: { size: size, inventory_quantity: { $gt: 0 } } }
-        },
-        {
-            $inc: { 'variants.$[].sizes.$[s].inventory_quantity': -1 }
-        },
-        {
-            new: true,
-            session: session,
-            arrayFilters: [{ 's.size': size }]
+const generatePayment = async (
+    amount,
+    email,
+    orderId,
+    orderNumber,
+    customerId
+) => {
+    try {
+        if (!process.env.BASE_URL || !process.env.STRIPE_SECRET_KEY) {
+            throw new Error('Payment Failed CODE 1');
         }
-    ).exec();     
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+            apiVersion: '2024-06-20',
+        });
+
+        const formattedAmount = Math.round(amount * 100);
+
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: formattedAmount,
+            currency: 'INR',
+            automatic_payment_methods: {
+                enabled: true,
+            },
+            receipt_email: email,
+            return_url: `${process.env.BASE_URL}/stripe/webhook`,
+            metadata: {
+                orderId,
+                customerId,
+                orderNumber,
+            },
+        });
+
+        return paymentIntent?.client_secret;
+    } catch (err) {
+        throw err;
+    }
 };
 
 /**
@@ -270,7 +292,6 @@ export const updateOrder = async (req, res) => {
     }
 };
 
-
 /**
  * Handles a GET request to get all customer orders.
  *
@@ -281,7 +302,6 @@ export const updateOrder = async (req, res) => {
 
 export const getCustomerOrders = async (req, res) => {
     try {
-        
         const { offset, limit } = req.query;
 
         const { id } = req.params;
@@ -295,9 +315,10 @@ export const getCustomerOrders = async (req, res) => {
                 $facet: {
                     data: [
                         {
-                            $match:{
-                                customer_id:Types.ObjectId.createFromHexString(id)
-                            }
+                            $match: {
+                                customer_id:
+                                    Types.ObjectId.createFromHexString(id),
+                            },
                         },
                         { $skip: Number(offset) || 0 },
                         { $limit: Number(limit) || 10 }, // default limit to 10 if not provided
@@ -332,4 +353,3 @@ export const getCustomerOrders = async (req, res) => {
             .json(failureResponse(err?.message || 'something went wrong'));
     }
 };
-

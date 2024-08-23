@@ -21,6 +21,8 @@
         "mongoose": "^8.5.3",
         "morgan": "^1.10.0",
         "nanoid": "^5.0.7",
+        "nodemailer": "^6.9.14",
+        "stripe": "^16.8.0",
         "yup": "^1.4.0"
     },
     "imports": {

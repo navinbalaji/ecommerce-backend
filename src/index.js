@@ -14,6 +14,7 @@ import productRouter from './controllers/product/product.controller.js';
 import customerRouter from './controllers/customer/customer.controller.js';
 import orderRouter from './controllers/order/order.controller.js';
 import cartRouter from './controllers/cart/cart.controller.js';
+import stripeRouter from './controllers/stripe/stripe.controller.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -28,6 +29,7 @@ app.use(express.json())
 app.get('/ping', (_, res) => res.status(200).send('pong'));
 app.use('/auth', authRouter);
 app.use('/product', productRouter);
+app.use('/stripe', stripeRouter);
 
 /**
  * Middleware token handle
