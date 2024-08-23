@@ -218,23 +218,19 @@ export const deleteProduct = async (req, res) => {
  */
 
 export const getNewProducts = async (req, res) => {
-    // try {
-    //     const { id } = req.params;
-    //     if (!id) {
-    //         throw new Error('Product Id is missing');
-    //     }
-    //     const product = await Product.findByIdAndDelete(id).exec();
-    //     if (!product) {
-    //         throw new Error('Product delete failed');
-    //     }
-    //     return res
-    //         .status(200)
-    //         .json(successResponse('Product deleted successfully'));
-    // } catch (err) {
-    //     return res
-    //         .status(400)
-    //         .json(failureResponse(err?.message || 'something went wrong'));
-    // }
+    try {
+        const products = await Product.find().sort({ createdAt: -1 }).limit(6).lean().exec()
+        if (!products?.length) {
+            throw new Error('No Products are available');
+        }
+        return res
+            .status(200)
+            .json(successResponse('New Product Fetched successfully',{products}));
+    } catch (err) {
+        return res
+            .status(400)
+            .json(failureResponse(err?.message || 'something went wrong'));
+    }
 };
 
 /**
@@ -246,21 +242,17 @@ export const getNewProducts = async (req, res) => {
  */
 
 export const getBestSellingProducts = async (req, res) => {
-    // try {
-    //     const { id } = req.params;
-    //     if (!id) {
-    //         throw new Error('Product Id is missing');
-    //     }
-    //     const product = await Product.findByIdAndDelete(id).exec();
-    //     if (!product) {
-    //         throw new Error('Product delete failed');
-    //     }
-    //     return res
-    //         .status(200)
-    //         .json(successResponse('Product deleted successfully'));
-    // } catch (err) {
-    //     return res
-    //         .status(400)
-    //         .json(failureResponse(err?.message || 'something went wrong'));
-    // }
+    try {
+        const products = await Product.find().sort({ createdAt: -1 }).limit(6).lean().exec()
+        if (!products?.length) {
+            throw new Error('No Products are available');
+        }
+        return res
+            .status(200)
+            .json(successResponse('New Product Fetched successfully',{products}));
+    } catch (err) {
+        return res
+            .status(400)
+            .json(failureResponse(err?.message || 'something went wrong'));
+    }
 };
