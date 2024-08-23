@@ -1,0 +1,26 @@
+meta {
+  name: Update Cart
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/cart
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "customer_id": "66c373fcbad4219b690ed115",
+    "products": [
+      {
+        "product_id": "66c81ed1c0ebbac2a58f9061",
+        "size": "L",
+        "quantity": 1
+      }
+    ],
+    "new_delivery_address": {},
+    "is_default_address": true
+  }
+}
