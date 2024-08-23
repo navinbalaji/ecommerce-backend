@@ -110,7 +110,7 @@ export const createOrder = async (req, res) => {
 
         // Update BestSelling
         await BestSelling.updateMany(
-            { product_id: { $in: productIds.map(id => Types.ObjectId(id)) } },
+            { product_id: { $in: productIds.map(id => id).filter(Boolean) } },
             { $inc: { quantity: 1 } },
             { upsert: true, session }
         );

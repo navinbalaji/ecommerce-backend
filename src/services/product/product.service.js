@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 // schema
 import Product from '#schema/product.schema.js';
 import Analytics from '#schema/analytics.schema.js';
+import BestSelling from '#schema/best-selling.schema.js';
 
 // utils
 import { successResponse, failureResponse } from '#common';
@@ -219,13 +220,19 @@ export const deleteProduct = async (req, res) => {
 
 export const getNewProducts = async (req, res) => {
     try {
-        const products = await Product.find().sort({ createdAt: -1 }).limit(6).lean().exec()
+        const products = await Product.find()
+            .sort({ createdAt: -1 })
+            .limit(6)
+            .lean()
+            .exec();
         if (!products?.length) {
             throw new Error('No Products are available');
         }
-        return res
-            .status(200)
-            .json(successResponse('New Product Fetched successfully',{products}));
+        return res.status(200).json(
+            successResponse('New Product Fetched successfully', {
+                products,
+            })
+        );
     } catch (err) {
         return res
             .status(400)
@@ -243,13 +250,30 @@ export const getNewProducts = async (req, res) => {
 
 export const getBestSellingProducts = async (req, res) => {
     try {
-        const products = await Product.find().sort({ createdAt: -1 }).limit(6).lean().exec()
+        const bestSellingproducts = await BestSelling.find()
+            .sort({ quantity: -1 })
+            .limit(6)
+            .lean()
+            .exec();
+            
+        const products = await Product.find({
+            _id: {
+                $in: bestSellingproducts
+                    .map((e) => e.product_id)
+                    .filter(Boolean),
+            },
+        })
+            .lean()
+            .exec();
+
         if (!products?.length) {
             throw new Error('No Products are available');
         }
-        return res
-            .status(200)
-            .json(successResponse('New Product Fetched successfully',{products}));
+        return res.status(200).json(
+            successResponse('New Product Fetched successfully', {
+                products,
+            })
+        );
     } catch (err) {
         return res
             .status(400)
