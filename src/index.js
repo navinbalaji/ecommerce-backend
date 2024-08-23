@@ -27,6 +27,7 @@ app.use(morgan('tiny'));
 app.use(express.json())
 app.get('/ping', (_, res) => res.status(200).send('pong'));
 app.use('/auth', authRouter);
+app.use('/product', productRouter);
 
 /**
  * Middleware token handle
@@ -38,7 +39,6 @@ app.use(tokenExpirationMiddleware)
  * Routes
  */
 
-app.use('/product', productRouter);
 app.use('/customer', customerRouter);
 app.use('/cart', cartRouter);
 app.use('/order', orderRouter);

@@ -25,15 +25,18 @@ export const createOrder = async (req, res) => {
     session.startTransaction();
 
     try {
-        const { email } = req.body;
+        const { customer_id } = req.body;
 
-        if (!email) {
-            throw new Error('Email ID required');
+        if (!customer_id) {
+            throw new Error('Customer ID required');
         }
 
-        const customerCart = await Cart.findOne({ email })
+        const customerCart = await Cart.findOne({
+            customer_id: Types.ObjectId.createFromHexString(customer_id),
+        })
             .session(session)
             .exec();
+
         if (!customerCart || customerCart.products.length === 0) {
             throw new Error(customerCart ? 'Cart is empty' : 'Cart not found');
         }
@@ -97,7 +100,10 @@ export const createOrder = async (req, res) => {
         );
 
         // Remove the cart
-        await Cart.deleteOne({ email }, { session });
+        await Cart.deleteOne(
+            { customer_id: Types.ObjectId.createFromHexString(customer_id) },
+            { session }
+        );
 
         // TODO: Send order email
 
@@ -110,7 +116,7 @@ export const createOrder = async (req, res) => {
 
         // Update BestSelling
         await BestSelling.updateMany(
-            { product_id: { $in: productIds.map(id => id).filter(Boolean) } },
+            { product_id: { $in: productIds.map((id) => id).filter(Boolean) } },
             { $inc: { quantity: 1 } },
             { upsert: true, session }
         );

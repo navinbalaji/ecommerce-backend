@@ -23,14 +23,22 @@ export const createAndUpdateCart = async (req, res) => {
     try {
         session.startTransaction();
 
-        const { email, is_default_address, new_delivery_address, products } =
-            req.body;
+        const {
+            customer_id,
+            is_default_address,
+            new_delivery_address,
+            products,
+        } = req.body;
 
-        if (!email) {
-            return res.status(400).json(failureResponse('Email ID required'));
+        if (!customer_id) {
+            return res
+                .status(400)
+                .json(failureResponse('Customer ID required'));
         }
 
-        const customer = await Customer.findOne({ email }).session(session);
+        const customer = await Customer.findOne({ _id: customer_id }).session(
+            session
+        );
         if (!customer) {
             return res.status(404).json(failureResponse('Customer not found'));
         }
@@ -59,7 +67,7 @@ export const createAndUpdateCart = async (req, res) => {
         });
 
         const cartUpdateData = {
-            email,
+            email: customer.email,
             customer_id: customer._id,
             products: eligibleProductsForOrder,
             delivery_address: is_default_address
@@ -72,7 +80,9 @@ export const createAndUpdateCart = async (req, res) => {
         }
 
         let cartData;
-        const customerCart = await Cart.findOne({ email })
+        const customerCart = await Cart.findOne({
+            customer_id: Types.ObjectId.createFromHexString(customer_id),
+        })
             .session(session)
             .exec();
         if (customerCart) {

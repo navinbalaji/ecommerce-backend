@@ -18,7 +18,6 @@ const deliveryAddressValidator = yup.object().shape({
 });
 
 export const cartCreateValidator = yup.object().shape({
-    email: yup.string().email().required('Email is required'),
     customer_id: yup.string().required('Customer Id is required'),
     products: yup
         .array()
