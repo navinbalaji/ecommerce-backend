@@ -15,6 +15,7 @@ import customerRouter from './controllers/customer/customer.controller.js';
 import orderRouter from './controllers/order/order.controller.js';
 import cartRouter from './controllers/cart/cart.controller.js';
 import stripeRouter from './controllers/stripe/stripe.controller.js';
+import imageRouter from './controllers/image/image.controller.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -44,6 +45,7 @@ app.use(tokenExpirationMiddleware)
 app.use('/customer', customerRouter);
 app.use('/cart', cartRouter);
 app.use('/order', orderRouter);
+app.use('/image', imageRouter);
 
 app.listen(PORT, () => {
     // init database

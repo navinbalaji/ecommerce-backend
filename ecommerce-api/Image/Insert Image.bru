@@ -1,0 +1,18 @@
+meta {
+  name: Insert Image
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/image
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "",
+    "imageBase64": ""
+  }
+}

@@ -67,3 +67,7 @@ export const sendEmail = async (to, subject, html) => {
 
     console.log('Message sent: %s', info.messageId);
 };
+
+export const uploadImage = async (imageBase64) => {
+    return
+};

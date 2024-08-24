@@ -196,7 +196,7 @@ export const deleteProduct = async (req, res) => {
         const product = await Product.findByIdAndDelete(id).exec();
 
         if (!product) {
-            throw new Error('Product delete failed');
+            throw new Error('Product not found');
         }
 
         // Update analytics
