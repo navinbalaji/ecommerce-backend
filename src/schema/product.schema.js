@@ -26,6 +26,9 @@ const variantSizeSchema = new Schema({
     price: {
         type: Number,
     },
+    image_src:{
+        type: String,
+    },
     sku: {
         type: String,
         index: true,

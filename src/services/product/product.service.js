@@ -9,6 +9,7 @@ import BestSelling from '#schema/best-selling.schema.js';
 
 // utils
 import { successResponse, failureResponse } from '#common';
+import { PRODUCT_STATUS_CONSTANT } from '#src/constants.js';
 
 /**
  * Handles a POST request to create a new product.
@@ -60,17 +61,27 @@ export const createProduct = async (req, res) => {
 
 export const getAllProducts = async (req, res) => {
     try {
-        const { offset, limit } = req.query;
+        const { page, limit } = req.query;
 
         const pipeline = [
             {
                 $facet: {
                     data: [
-                        { $skip: Number(offset) || 0 },
+                        {
+                            $match: {
+                                status: PRODUCT_STATUS_CONSTANT.ACTIVE,
+                            },
+                        },
+                        { $skip: Number(limit * (page - 1)) || 0 },
                         { $limit: Number(limit) || 10 }, // default limit to 10 if not provided
                         { $sort: { _id: 1 } },
                     ],
                     totalCount: [
+                        {
+                            $match: {
+                                status: PRODUCT_STATUS_CONSTANT.ACTIVE,
+                            },
+                        },
                         { $count: 'total' }, // count the total number of documents
                     ],
                 },
@@ -255,7 +266,7 @@ export const getBestSellingProducts = async (req, res) => {
             .limit(6)
             .lean()
             .exec();
-            
+
         const products = await Product.find({
             _id: {
                 $in: bestSellingproducts

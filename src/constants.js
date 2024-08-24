@@ -14,3 +14,9 @@ export const ROLES = {
     ADMIN: 'ADMIN',
     USER: 'USER',
 };
+
+export const PRODUCT_STATUS_CONSTANT = {
+    DRAFT: 'DRAFT',
+    ACTIVE: 'ACTIVE',
+    ARCHIVED: 'ARCHIVED',
+};

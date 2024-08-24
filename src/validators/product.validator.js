@@ -55,6 +55,7 @@ export const productCreateSchema = yup.object().shape({
         .oneOf(PRODUCT_STATUS)
         .required('Product Status is required'),
     tags: yup.array().of(yup.string()).notRequired(),
+    image_src: yup.string().required('Product Image is required'),
     variants: yup
         .array()
         .of(variantSchema)
