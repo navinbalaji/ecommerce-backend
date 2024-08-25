@@ -23,7 +23,7 @@ const orderRouter = new Router();
 
 orderRouter.get('/all',roleMiddleware(ROLES.ADMIN), getAllOrders);
 
-orderRouter.get('/customer/:id', getCustomerOrders);
+orderRouter.get('/customer', getCustomerOrders);
 
 orderRouter.get('/:id', getOrderByOrderId);
 

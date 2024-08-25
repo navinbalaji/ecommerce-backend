@@ -95,7 +95,7 @@ export const createOrder = async (req, res) => {
             ],
             { session }
         );
-        
+
         const stripe_client_secret = await generatePayment(
             order_amount,
             customerCart.email,
@@ -311,7 +311,7 @@ export const getCustomerOrders = async (req, res) => {
     try {
         const { offset, limit } = req.query;
 
-        const { id } = req.params;
+        const id = req?.user?.cid;
 
         if (!id) {
             throw new Error('Customer Id is missing');
