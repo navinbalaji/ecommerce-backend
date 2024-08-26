@@ -48,3 +48,14 @@ export const customerUpdateSchema = yup.object().shape({
         pincode: yup.number().required('Pincode is required'),
     }),
 });
+
+export const verificationTokenSchema = yup.object().shape({
+    token: yup.string().required('Token is required'),
+});
+
+export const resendVerificationTokenSchema = yup.object().shape({
+    email: yup
+        .string()
+        .email('Invalid email address')
+        .required('Email is required'),
+});

@@ -41,8 +41,8 @@ export const sendEmail = async (to, subject, html) => {
         port: 587,
         secure: false, // Use `true` for port 465, `false` for all other ports
         auth: {
-            user: 'maddison53@ethereal.email',
-            pass: 'jn7jnAPss4f63QBp6D',
+            user: process.env.MAIL_USERNAME,
+            pass: process.env.MAIL_PASSWORD,
         },
     });
 
@@ -59,15 +59,19 @@ export const sendEmail = async (to, subject, html) => {
     //   });
 
     const info = await transporter.sendMail({
-        from: '"Maddison Foo Koch 👻" <maddison53@ethereal.email>', // sender address
-        to: 'bar@example.com, baz@example.com', // list of receivers
-        subject: 'Hello ✔', // Subject line
-        html: '<b>Hello world?</b>', // html body
+        from: process.env.MAIL_FROM,
+        to: to, 
+        subject: subject,
+        html:html
     });
 
     console.log('Message sent: %s', info.messageId);
 };
 
 export const uploadImage = async (imageBase64) => {
-    return
+    return;
+};
+
+export const generateVerificationToken = (data) => {
+    return jwt.sign(data,process.env.JWT_SECRET,{ expiresIn: '1h' });
 };

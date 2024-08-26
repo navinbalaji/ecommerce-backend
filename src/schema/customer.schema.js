@@ -57,10 +57,9 @@ const customerSchema = new Schema({
     is_verified: {
         type: Boolean,
     },
-    otp:{
+    verification_token:{
         type: String,
-        index: true,  
-    }
+    },
 },{
     timestamps:true
 });

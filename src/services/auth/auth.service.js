@@ -5,7 +5,14 @@ import Customer from '#schema/customer.schema.js';
 import Analytics from '#schema/analytics.schema.js';
 
 // utils
-import { successResponse, failureResponse, signJwtToken } from '#common';
+import {
+    successResponse,
+    failureResponse,
+    signJwtToken,
+    sendEmail,
+    generateVerificationToken,
+} from '#common';
+import verificationTemplate from '#templates/verification.template.js';
 
 import { ROLES } from '#src/constants.js';
 
@@ -65,10 +72,10 @@ export const register = async (req, res) => {
 
         const { name, email, password, phone_number, date_of_birth } = req.body;
 
-        const customerExists= await Customer.exists({email}).exec()
+        const customerExists = await Customer.exists({ email }).exec();
 
-        if(customerExists){
-            throw new Error("Customer already exists")
+        if (customerExists) {
+            throw new Error('Customer already exists');
         }
 
         // Create a new customer
@@ -87,6 +94,25 @@ export const register = async (req, res) => {
             { session }
         );
 
+        // Generate verification token
+        const verificationToken = generateVerificationToken({
+            customerId: customer._id,
+            email: customer.email,
+        });
+
+        customer.verification_token = verificationToken;
+        await customer.save({ session });
+
+        const mailOptions = {
+            subject: 'Verify your email',
+            text: verificationTemplate(
+                process.env.FRONTEND_BASE_URL,
+                verificationToken
+            ),
+        };
+
+        await sendEmail(customer.email, mailOptions.subject, mailOptions.text);
+
         // Update analytics
         await Analytics.findOneAndUpdate(
             { name: 'dashboard' },
@@ -95,8 +121,6 @@ export const register = async (req, res) => {
         );
 
         await session.commitTransaction();
-
-        // TODO: Send Verification Email
 
         return res
             .status(200)
@@ -111,5 +135,94 @@ export const register = async (req, res) => {
         return res
             .status(400)
             .json(failureResponse(err?.message || 'Something went wrong'));
+    }
+};
+
+export const verifyCustomer = async (req, res) => {
+    const { token } = req.body;
+
+    try {
+        // Verify the JWT token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Find the customer by the ID in the token
+        const customer = await Customer.findById(decoded.customerId);
+
+        if (!customer) {
+            return res.status(404).json(failureResponse('Customer not found'));
+        }
+
+        // Check if the customer has already been verified
+        if (customer.is_verified) {
+            return res
+                .status(400)
+                .json(failureResponse('Customer already verified'));
+        }
+
+        // Update the customer's verification status
+        customer.is_verified = true;
+        customer.verification_token = null;
+        await customer.save();
+
+        return res
+            .status(200)
+            .json(successResponse('Email verified successfully'));
+    } catch (err) {
+        return res
+            .status(400)
+            .json(
+                failureResponse(err?.message || 'Invalid verification token')
+            );
+    }
+};
+
+export const resendVerificationToken = async (req, res) => {
+    const session = await mongoose.startSession();
+    try {
+        session.startTransaction();
+
+        const { email } = req.body;
+
+        // Find the customer by email
+        const customer = await Customer.findOne({ email }, { session });
+
+        if (!customer) {
+            return res.status(404).json(failureResponse('Customer not found'));
+        }
+
+        // Generate verification token
+        const verificationToken = generateVerificationToken({
+            customerId: customer._id,
+            email: customer.email,
+        });
+
+        customer.verification_token = verificationToken;
+        await customer.save({ session });
+
+        const mailOptions = {
+            subject: 'Verify your email',
+            text: verificationTemplate(
+                process.env.FRONTEND_BASE_URL,
+                verificationToken
+            ),
+        };
+
+        await sendEmail(customer.email, mailOptions.subject, mailOptions.text);
+
+        await session.commitTransaction();
+
+        return res.status(200).json(successResponse('Verification email sent'));
+    } catch (err) {
+        if (session.inTransaction) {
+            await session.abortTransaction();
+        }
+
+        return res
+            .status(400)
+            .json(
+                failureResponse(
+                    err?.message || 'Failed to resend verification email'
+                )
+            );
     }
 };
