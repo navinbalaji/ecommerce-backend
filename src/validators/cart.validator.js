@@ -30,7 +30,6 @@ export const cartCreateValidator = yup.object().shape({
     products: yup
         .array()
         .of(cartProductValidator)
-        .min(1, 'Minimum 1 product is required')
         .required('Products are required'),
     new_delivery_address: yup.object().when('is_default_address', {
         is: false,
