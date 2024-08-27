@@ -11,11 +11,12 @@ import {
     signJwtToken,
     sendEmail,
     generateVerificationToken,
-    verifyJwtToken
+    verifyJwtToken,
 } from '#common';
 import verificationTemplate from '#templates/verification.template.js';
 
 import { ROLES } from '#src/constants.js';
+import { customerTransform } from '#transformers/customer.transformer.js';
 
 /**
  * Handles a POST request to login a  user.
@@ -49,7 +50,12 @@ export const login = async (req, res) => {
 
         return res
             .status(200)
-            .json(successResponse('Loggedin successfully', { token }));
+            .json(
+                successResponse('Loggedin successfully', {
+                    customer: customerTransform(customer),
+                    token,
+                })
+            );
     } catch (err) {
         return res
             .status(400)
@@ -125,9 +131,7 @@ export const register = async (req, res) => {
 
         return res
             .status(200)
-            .json(
-                successResponse('Customer Registered successfully', customer)
-            );
+            .json(successResponse('Customer Registered successfully'));
     } catch (err) {
         if (session.inTransaction) {
             await session.abortTransaction();
@@ -144,7 +148,7 @@ export const verifyCustomer = async (req, res) => {
 
     try {
         // Verify the JWT token
-        const decoded = verifyJwtToken(token,process.env.JWT_SECRET);
+        const decoded = verifyJwtToken(token, process.env.JWT_SECRET);
 
         // Find the customer by the ID in the token
         const customer = await Customer.findById(decoded.customerId);
