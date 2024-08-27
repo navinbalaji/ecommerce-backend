@@ -11,6 +11,7 @@ import {
     signJwtToken,
     sendEmail,
     generateVerificationToken,
+    verifyJwtToken
 } from '#common';
 import verificationTemplate from '#templates/verification.template.js';
 
@@ -143,7 +144,7 @@ export const verifyCustomer = async (req, res) => {
 
     try {
         // Verify the JWT token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = verifyJwtToken(token,process.env.JWT_SECRET);
 
         // Find the customer by the ID in the token
         const customer = await Customer.findById(decoded.customerId);
