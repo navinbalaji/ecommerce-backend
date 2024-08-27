@@ -73,5 +73,5 @@ export const uploadImage = async (imageBase64) => {
 };
 
 export const generateVerificationToken = (data) => {
-    return jwt.sign(data,process.env.JWT_SECRET,{ expiresIn: '1h' });
+    return jwt.sign(data,process.env.JWT_SECRET_KEY,{ expiresIn: '1h' });
 };
