@@ -5,7 +5,7 @@ import Stripe from 'stripe';
 
 // schema
 import Product from '#schema/product.schema.js';
-import Cart from '#schema/cart.schema.js';
+import Order from '#schema/order.schema.js';
 import Analytics from '#schema/analytics.schema.js';
 import BestSelling from '#schema/best-selling.schema.js';
 import InventoryReduce from '#schema/inventory-reduce.schema.js';
@@ -48,6 +48,18 @@ export const handleWebhook = async (req, res) => {
             },
             { session }
         );
+
+        const order = await Order.findOne({
+            order_id: Types.ObjectId.createFromHexString(orderId),
+        }).exec();
+
+        if (!order) {
+            inventoryDoc.is_webhook_delivered = true;
+            inventoryDoc.stripe = event;
+
+            inventoryDoc.save({ session });
+            return;
+        }
 
         // Handle the event
         if (event.type !== 'payment_intent.succeeded') {
@@ -92,10 +104,16 @@ export const handleWebhook = async (req, res) => {
             { upsert: true, session }
         );
 
+        // inventory update
         inventoryDoc.is_webhook_delivered = false;
         inventoryDoc.stripe = event;
 
-        inventoryDoc.save({ session });
+        // payment completed
+        order.is_payment_completed = true;
+
+        await inventoryDoc.save({ session });
+
+        await order.save({ session });
 
         await session.commitTransaction();
 
