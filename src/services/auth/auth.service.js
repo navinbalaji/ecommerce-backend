@@ -48,6 +48,12 @@ export const login = async (req, res) => {
 
         const token = signJwtToken({ cid: customer._id, role: customer.role });
 
+        res.cookie('token', token, {
+            expires: new Date(Date.now() + 36000000), // Cookie expires in 10 hours
+            httpOnly: true,
+            secure: true
+          });
+          
         return res
             .status(200)
             .json(

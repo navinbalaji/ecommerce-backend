@@ -1,0 +1,15 @@
+meta {
+  name: Get Customer By Id
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/customer/:id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 66c373fcbad4219b690ed115
+}

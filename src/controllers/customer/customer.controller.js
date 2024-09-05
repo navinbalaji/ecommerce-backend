@@ -5,6 +5,7 @@ import { Router } from 'express';
 // services
 import {
     getAllCustomers,
+    getCustomerById,
     getCustomer,
     updateCustomer,
     searchCustomer,
@@ -22,9 +23,11 @@ const customerRouter = new Router();
 
 customerRouter.get('/all', roleMiddleware(ROLES.ADMIN), getAllCustomers);
 
-customerRouter.get('/search', searchCustomer);
+customerRouter.get('/search',roleMiddleware(ROLES.ADMIN), searchCustomer);
 
-customerRouter.get('/:id', getCustomer);
+customerRouter.get('/:id', roleMiddleware(ROLES.ADMIN) ,getCustomerById);
+
+customerRouter.get('/', getCustomer);
 
 customerRouter.put('/:id', validate(customerUpdateSchema), updateCustomer);
 

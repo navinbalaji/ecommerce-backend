@@ -6,7 +6,7 @@ import Customer from '#schema/customer.schema.js';
 // utils
 import { successResponse, failureResponse } from '#common';
 import { customerTransform } from '#transformers/customer.transformer.js';
-import {  ROLES } from '#src/constants.js';
+import { ROLES } from '#src/constants.js';
 
 /**
  * Handles a GET request to get all customers.
@@ -64,14 +64,14 @@ export const getAllCustomers = async (req, res) => {
 };
 
 /**
- * Handles a GET request to get a customers.
+ * Handles a GET request to get a customer by id.
  *
  * @param {Request} req
  * @param {Response} res
  * @returns {Response}
  */
 
-export const getCustomer = async (req, res) => {
+export const getCustomerById = async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -182,5 +182,38 @@ export const searchCustomer = async (req, res) => {
         return res
             .status(400)
             .json(failureResponse(err?.message || 'Something went wrong'));
+    }
+};
+
+/**
+ * Handles a GET request to get a customer.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response}
+ */
+
+export const getCustomer = async (req, res) => {
+    try {
+        const  id  = req?.user?.cid;
+
+        if (!id) {
+            throw new Error('Customer Id is missing');
+        }
+        const customer = await Customer.findById(id).lean().exec();
+
+        if (!customer) {
+            return res.status(404).json(failureResponse('Customer not found'));
+        }
+
+        return res.status(200).json(
+            successResponse('Customer fetched successfully', {
+                customer: customerTransform(customer),
+            })
+        );
+    } catch (err) {
+        return res
+            .status(400)
+            .json(failureResponse(err?.message || 'something went wrong'));
     }
 };
