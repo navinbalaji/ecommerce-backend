@@ -5,7 +5,11 @@ meta {
 }
 
 delete {
-  url: {{baseUrl}}/image
+  url: {{baseUrl}}/image/:id
   body: none
   auth: inherit
+}
+
+params:path {
+  id: 
 }
