@@ -1,6 +1,16 @@
 import jwt from 'jsonwebtoken';
 import { customAlphabet } from 'nanoid';
 import nodemailer from 'nodemailer';
+import AWS from 'aws-sdk';
+
+// Configure AWS credentials
+AWS.config.update({
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey:  process.env.AWS_SECRET_KEY,
+    region:  process.env.AWS_REGION_NAME,
+});
+
+const s3 = new AWS.S3();
 
 export const successResponse = (message, data) => ({
     message,
@@ -60,18 +70,33 @@ export const sendEmail = async (to, subject, html) => {
 
     const info = await transporter.sendMail({
         from: process.env.MAIL_FROM,
-        to: to, 
+        to: to,
         subject: subject,
-        html:html
+        html: html,
     });
 
     console.log('Message sent: %s', info.messageId);
 };
 
-export const uploadImage = async (imageBase64) => {
-    return;
+export const uploadImage = async (fileName, base64Content) => {
+    try {
+        const buff = Buffer.from(base64Content, 'base64');
+
+        const params = {
+          Bucket:  process.env.AWS_BUCKET_NAME,
+          Key: fileName,
+          Body: buff,
+          ContentEncoding: 'base64',
+          ContentType: 'application/octet-stream'
+        };
+    
+        const { Location } = await s3.upload(params).promise();
+        return Location;
+    } catch (err) {
+        console.log(`Error uploading file: ${err}`);
+    }
 };
 
 export const generateVerificationToken = (data) => {
-    return jwt.sign(data,process.env.JWT_SECRET_KEY,{ expiresIn: '1h' });
+    return jwt.sign(data, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
 };

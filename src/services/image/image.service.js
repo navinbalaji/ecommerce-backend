@@ -22,7 +22,7 @@ export const insertImage = async (req, res) => {
         session.startTransaction();
         const { name, imageBase64 } = req.body;
 
-        const isNameAlreadyExist = await Image.findOne({ name }, { session });
+        const isNameAlreadyExist = await Image.findOne({ name }).session(session).exec();
 
         if (isNameAlreadyExist) {
             throw new Error(
@@ -31,7 +31,7 @@ export const insertImage = async (req, res) => {
         }
 
         // Upload Image
-        const url = await uploadImage(imageBase64);
+        const url = await uploadImage(name,imageBase64);
 
         const [imageData] = await Image.create(
             [
