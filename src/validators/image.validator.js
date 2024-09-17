@@ -7,10 +7,12 @@ export const imageInsertSchema = yup.object().shape({
     imageBase64: yup
         .string()
         .required('Image Base64 is required')
+        .matches(/^data:image\/(png|jpg|jpeg|gif);base64,/, 'Invalid Data URI format')
         .test('isBase64', 'Invalid base64 string', (value) => {
+            if (!value) return false; // Handle empty value case
+            const base64String = value.split(',')[1]; // Extract the base64 part
             try {
-                // Attempt to decode the base64 string
-                atob(value);
+                atob(base64String);
                 return true;
             } catch (err) {
                 return false;
