@@ -5,4 +5,5 @@ export const customerTransform = (customer) => ({
     phone_number: customer.phone_number,
     date_of_birth: customer.date_of_birth,
     is_verified: customer.is_verified,
+    address: customer.address,
 });
