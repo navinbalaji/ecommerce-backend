@@ -5,64 +5,77 @@ import { ROLE } from '#constants';
 export const customerAddressSchema = new Schema({
     line1: {
         type: String,
+        default: '',
     },
     line2: {
         type: String,
+        default: '',
     },
     landmark: {
         type: String,
+        default: '',
     },
     city: {
         type: String,
+        default: '',
     },
     state: {
         type: String,
+        default: '',
     },
     country: {
         type: String,
+        default: '',
     },
     pincode: {
         type: Number,
+        default: 0,
     },
 });
 
-const customerSchema = new Schema({
-    name: {
-        type: String,
-        index: true,
+const customerSchema = new Schema(
+    {
+        name: {
+            type: String,
+            index: true,
+        },
+        email: {
+            type: String,
+            unique: true,
+            index: true,
+        },
+        password: {
+            type: String,
+            index: true,
+        },
+        phone_number: {
+            type: String,
+            index: true,
+        },
+        date_of_birth: {
+            type: String,
+            index: true,
+        },
+        role: {
+            type: String,
+            enum: ROLE,
+            index: true,
+        },
+        address: {
+            type: customerAddressSchema,
+            default: () => ({}),
+        },
+        is_verified: {
+            type: Boolean,
+        },
+        verification_token: {
+            type: String,
+        },
     },
-    email: {
-        type: String,
-        unique: true,
-        index: true,
-    },
-    password: {
-        type: String,
-        index: true,
-    },
-    phone_number: {
-        type: String,
-        index: true,
-    },
-    date_of_birth: {
-        type: String,
-        index: true,
-    },
-    role: {
-        type: String,
-        enum: ROLE,
-        index: true,
-    },
-    address: customerAddressSchema,
-    is_verified: {
-        type: Boolean,
-    },
-    verification_token:{
-        type: String,
-    },
-},{
-    timestamps:true
-});
+    {
+        timestamps: true,
+    }
+);
 
 customerSchema.pre('save', async function (next) {
     if (this.isModified('password')) {
