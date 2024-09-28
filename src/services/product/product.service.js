@@ -62,7 +62,71 @@ export const createProduct = async (req, res) => {
 
 export const getAllProducts = async (req, res) => {
     try {
-        const { page, limit } = req.query;
+        const {
+            page,
+            limit,
+            color,
+            size,
+            productType,
+            gender,
+            pricelowToHigh,
+            priceHighToLow,
+        } = req.query;
+
+        const matchQuery = {
+            status: PRODUCT_STATUS_CONSTANT.ACTIVE,
+        };
+
+        if (productType) {
+            matchQuery['product_type'] = productType;
+        }
+
+        if (gender) {
+            matchQuery['gender'] = gender;
+        }
+
+        if (color && size) {
+            matchQuery['variants'] = {
+                $elemMatch: {
+                    color: color,
+                    sizes: {
+                        $elemMatch: {
+                            size: size,
+                        },
+                    },
+                },
+            };
+        } else {
+            if (color) {
+                matchQuery['variants'] = {
+                    $elemMatch: {
+                        color: color,
+                    },
+                };
+            }
+
+            if (size) {
+                matchQuery['variants'] = {
+                    $elemMatch: {
+                        sizes: {
+                            $elemMatch: {
+                                size: size,
+                            },
+                        },
+                    },
+                };
+            }
+        }
+
+        let sort = { _id: 1 };
+
+        if (pricelowToHigh) {
+            sort = { 'variants.sizes.price': 1 };
+        }
+
+        if (priceHighToLow) {
+            sort = { 'variants.sizes.price': -1 };
+        }
 
         const pipeline = [
             {
@@ -70,17 +134,17 @@ export const getAllProducts = async (req, res) => {
                     data: [
                         {
                             $match: {
-                                status: PRODUCT_STATUS_CONSTANT.ACTIVE,
+                                ...matchQuery,
                             },
                         },
                         { $skip: Number(limit * (page - 1)) || 0 },
                         { $limit: Number(limit) || 10 }, // default limit to 10 if not provided
-                        { $sort: { _id: 1 } },
+                        { $sort: sort },
                     ],
                     totalCount: [
                         {
                             $match: {
-                                status: PRODUCT_STATUS_CONSTANT.ACTIVE,
+                                            ...matchQuery,
                             },
                         },
                         { $count: 'total' }, // count the total number of documents
@@ -90,7 +154,7 @@ export const getAllProducts = async (req, res) => {
             {
                 $project: {
                     data: 1,
-                    totalCount: { $arrayElemAt: ['$totalCount.total', 0] }, // extract the total count from the array
+                    totalCount: { $ifNull: [{ $arrayElemAt: ['$totalCount.total', 0] }, 0] }, 
                 },
             },
         ];
