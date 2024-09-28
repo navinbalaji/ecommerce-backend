@@ -26,7 +26,7 @@ const variantSizeSchema = new Schema({
     price: {
         type: Number,
     },
-    image_src:{
+    image_src: {
         type: String,
     },
     sku: {
@@ -69,6 +69,10 @@ const productSchema = new Schema(
             type: String,
             index: true,
         },
+        description: {
+            type: String,
+            index: true,
+        },
         gender: {
             type: String,
             enum: GENDER,
@@ -86,6 +90,9 @@ const productSchema = new Schema(
         tags: {
             type: [String],
             index: true,
+        },
+        size_chart_src: {
+            type: String,
         },
         variants: [variantSchema],
     },

@@ -11,6 +11,7 @@ import {
     deleteProduct,
     getNewProducts,
     getBestSellingProducts,
+    getAllProductFilters
 } from '#services/product/product.service.js';
 
 // validators
@@ -30,6 +31,8 @@ productRouter.get('/all', getAllProducts);
 productRouter.get('/new', getNewProducts);
 
 productRouter.get('/best-selling', getBestSellingProducts);
+
+productRouter.get('/filters', getAllProductFilters);
 
 productRouter.get('/:id', getProduct);
 
@@ -55,5 +58,6 @@ productRouter.delete(
     roleMiddleware(ROLES.ADMIN),
     deleteProduct
 );
+
 
 export default productRouter;

@@ -10,6 +10,7 @@ import BestSelling from '#schema/best-selling.schema.js';
 // utils
 import { successResponse, failureResponse } from '#common';
 import { PRODUCT_STATUS_CONSTANT } from '#src/constants.js';
+import { productFilterTransform } from '#transformers/product.transformer.js';
 
 /**
  * Handles a POST request to create a new product.
@@ -289,5 +290,48 @@ export const getBestSellingProducts = async (req, res) => {
         return res
             .status(400)
             .json(failureResponse(err?.message || 'something went wrong'));
+    }
+};
+
+/**
+ * Handles a GET request to return all product filters.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response}
+ */
+
+export const getAllProductFilters = async (req, res) => {
+    try {
+        const filtersData = await Product.aggregate([
+            {
+                $facet: {
+                    uniqueColors: [
+                        { $unwind: '$variants' },
+                        { $group: { _id: '$variants.color' } },
+                    ],
+                    uniqueProductTypes: [{ $group: { _id: '$product_type' } }],
+                },
+            },
+        ]);
+
+        // Extract results from the aggregated data
+        const uniqueColors = filtersData[0]?.uniqueColors || [];
+        const uniqueProductTypes = filtersData[0]?.uniqueProductTypes || [];
+
+        // Transform the filters
+        const filters = productFilterTransform(
+            uniqueColors,
+            uniqueProductTypes
+        );
+
+        return res
+            .status(200)
+            .json(successResponse('Filters fetched successfully', { filters }));
+    } catch (err) {
+        console.error('Error fetching product filters:', err); // Log the error for debugging
+        return res
+            .status(500)
+            .json(failureResponse(err?.message || 'Something went wrong'));
     }
 };
