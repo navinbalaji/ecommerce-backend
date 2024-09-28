@@ -10,7 +10,12 @@ import Cart from '#schema/cart.schema.js';
 import InventoryReduce from '#schema/inventory-reduce.schema.js';
 
 // utils
-import { successResponse, failureResponse, generateOrderNumber } from '#common';
+import {
+    successResponse,
+    failureResponse,
+    generateOrderNumber,
+    sendEmail,
+} from '#common';
 
 /**
  * Handles a POST request to create a new order.
@@ -358,5 +363,83 @@ export const getCustomerOrders = async (req, res) => {
         return res
             .status(400)
             .json(failureResponse(err?.message || 'something went wrong'));
+    }
+};
+
+/**
+ * Generate and send the order success email to customers
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response}
+ */
+
+export const generateOrderSuccessEmail = async (order) => {
+    try {
+        const { order_id, order_amount, customer_id, cart } = order;
+        const customerEmail = cart.email;
+        const customerName = customer_id.name || 'Customer';
+        const deliveryAddress = cart.delivery_address;
+        const products = cart.products;
+
+        const subject = `Your Order #${order_id} Has Been Successfully Placed!
+`;
+
+        // Build the products list HTML
+        const productListHtml = products
+            .map(
+                (product) => `
+        <tr>
+          <td>${product.product_name}</td>
+          <td>${product.size}</td>
+          <td>${product.color}</td>
+          <td>${product.quantity}</td>
+          <td>${product.price}</td>
+        </tr>`
+            )
+            .join('');
+
+        // Email template
+        const emailHtml = `
+      <h2>Order Success!</h2>
+      <p>Dear ${customerName},</p>
+      <p>Thank you for your purchase. Your order has been successfully placed with the following details:</p>
+
+      <h3>Order Details:</h3>
+      <p><strong>Order ID:</strong> ${order_id}</p>
+      <p><strong>Total Amount:</strong> $${order_amount}</p>
+
+      <h3>Delivery Address:</h3>
+      <p>${deliveryAddress.line1}, ${
+            deliveryAddress.line2 ? deliveryAddress.line2 + ', ' : ''
+        }${deliveryAddress.city}, ${deliveryAddress.state}, ${
+            deliveryAddress.country
+        } - ${deliveryAddress.pincode}</p>
+
+      <h3>Products:</h3>
+      <table border="1" cellspacing="0" cellpadding="10">
+        <thead>
+          <tr>
+            <th>Product Name</th>
+            <th>Size</th>
+            <th>Color</th>
+            <th>Quantity</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${productListHtml}
+        </tbody>
+      </table>
+
+      <p>We hope you enjoy your purchase. If you have any questions, feel free to contact us.</p>
+      <p>Best regards,</p>
+      <p>Your Company Name</p>
+    `;
+
+        await sendEmail(customerEmail, subject, emailHtml);
+    } catch (error) {
+        console.error('Error generating order success email:', error);
+        throw error;
     }
 };

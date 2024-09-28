@@ -4,7 +4,6 @@ import nodemailer from 'nodemailer';
 import AWS from 'aws-sdk';
 import mime from 'mime-types'
 
-
 // Configure AWS credentials
 AWS.config.update({
     accessKeyId: process.env.AWS_ACCESS_KEY,

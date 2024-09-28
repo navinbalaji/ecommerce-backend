@@ -10,6 +10,9 @@ import Analytics from '#schema/analytics.schema.js';
 import BestSelling from '#schema/best-selling.schema.js';
 import InventoryReduce from '#schema/inventory-reduce.schema.js';
 
+// service
+import { generateOrderSuccessEmail } from '../order/order.service.js';
+
 // utils
 import { successResponse, failureResponse } from '#common';
 
@@ -113,7 +116,9 @@ export const handleWebhook = async (req, res) => {
 
         await inventoryDoc.save({ session });
 
-        await order.save({ session });
+        const orderDoc = await order.save({ session });
+
+        await generateOrderSuccessEmail(orderDoc);
 
         await session.commitTransaction();
 

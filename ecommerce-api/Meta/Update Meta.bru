@@ -1,0 +1,19 @@
+meta {
+  name: Update Meta
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/meta
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "banner_image": "https://google.com",
+    "is_banner_image_full": false,
+    "sub_banner_image": "https://google.com"
+  }
+}

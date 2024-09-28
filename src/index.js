@@ -16,6 +16,7 @@ import orderRouter from './controllers/order/order.controller.js';
 import cartRouter from './controllers/cart/cart.controller.js';
 import stripeRouter from './controllers/stripe/stripe.controller.js';
 import imageRouter from './controllers/image/image.controller.js';
+import metaRouter from './controllers/meta/meta.controller.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -31,6 +32,7 @@ app.get('/ping', (_, res) => res.status(200).send('pong'));
 app.use('/auth', authRouter);
 app.use('/product', productRouter);
 app.use('/stripe', stripeRouter);
+app.use('/meta', metaRouter);
 
 /**
  * Middleware token handle
