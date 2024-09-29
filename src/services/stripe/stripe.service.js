@@ -17,15 +17,14 @@ import { generateOrderSuccessEmail } from '../order/order.service.js';
 import { successResponse, failureResponse } from '#common';
 
 /**
- * Handles a POST request to handle stripe payment
+ * Handles a POST request to handle Stripe payment
  *
  * @param {Request} req
  * @param {Response} res
  * @returns {Response}
  */
-
 export const handleWebhook = async (req, res) => {
-    console.log("******** stripe webhook called ******** ")
+    console.log("******** stripe webhook called ******** ");
     const session = await mongoose.startSession();
     try {
         session.startTransaction();
@@ -45,45 +44,43 @@ export const handleWebhook = async (req, res) => {
         // Access the metadata
         const { orderId, customerId, orderNumber } = paymentIntent?.metadata;
 
+        if(!orderId || !customerId || !orderNumber){
+            return res.status(200).json({orderId, customerId ,orderNumber})
+        }
+
         const inventoryDoc = await InventoryReduce.findOne(
             {
                 order_id: orderId,
                 order_number: orderNumber,
-            },
-            { session }
-        );
+            }
+        ).session(session); // Pass session here
 
-        const order = await Order.findOne({
-            order_id: Types.ObjectId.createFromHexString(orderId),
-        }).exec();
+        const order = await Order.findById(orderId).session(session); // Pass session here
 
         if (!order) {
             inventoryDoc.is_webhook_delivered = true;
             inventoryDoc.stripe = event;
 
-            inventoryDoc.save({ session });
+            await inventoryDoc.save({ session });
             return;
         }
-
         // Handle the event
         if (event.type !== 'payment_intent.succeeded') {
             inventoryDoc.is_webhook_delivered = true;
             inventoryDoc.stripe = event;
-            inventoryDoc.save({ session });
+            await inventoryDoc.save({ session });
             await session.commitTransaction();
             return res.status(200).json(successResponse('Payment Failed'));
         }
 
-        const productIds =
-            inventoryDoc?.inventory_products
-                ?.map((e) => e.product_id)
-                ?.filter(Boolean) || [];
+        const productIds = inventoryDoc?.inventory_products
+            ?.map((e) => e.product_id)
+            ?.filter(Boolean) || [];
 
-        await Promise.all(
-            inventoryDoc?.inventory_products.map((e) =>
-                reduceInventoryQuantity(e.product_id, e.color, e.size)
-            )
-        );
+        // Reduce inventory for each product
+        for (const e of inventoryDoc?.inventory_products) {
+            await reduceInventoryQuantity(e.product_id, e.color, e.size, session);
+        }
 
         // Update Analytics
         await Analytics.findOneAndUpdate(
@@ -94,7 +91,7 @@ export const handleWebhook = async (req, res) => {
                     total_orders: 1,
                 },
             },
-            { upsert: true, session }
+            { upsert: true, session } // Pass session here
         );
 
         // Update BestSelling
@@ -105,38 +102,42 @@ export const handleWebhook = async (req, res) => {
                 },
             },
             { $inc: { quantity: 1 } },
-            { upsert: true, session }
+            { upsert: true, session } // Pass session here
         );
 
-        // inventory update
+        // Update inventory document
         inventoryDoc.is_webhook_delivered = false;
         inventoryDoc.stripe = event;
 
-        // payment completed
+        // Mark payment as completed in the order
         order.is_payment_completed = true;
 
         await inventoryDoc.save({ session });
-
         const orderDoc = await order.save({ session });
 
+        // Generate order success email
         await generateOrderSuccessEmail(orderDoc);
 
+        // Commit the transaction
         await session.commitTransaction();
 
-        return res.status(200).json(successResponse('Payment successfull'));
+        return res.status(200).json(successResponse('Payment successful'));
     } catch (err) {
-        if (session.inTransaction) {
+        console.log("stripe webhook",err);
+        if (session.inTransaction()) {
             await session.abortTransaction();
         }
         return res
             .status(400)
-            .json(failureResponse(err?.message || 'something went wrong'));
+            .json(failureResponse(err?.message || 'Something went wrong'));
     } finally {
         session.endSession();
     }
 };
-const reduceInventoryQuantity = async (productId, color, size) => {
-    return Product.findOneAndUpdate(
+
+// Helper function to reduce inventory quantity
+const reduceInventoryQuantity = async (productId, color, size, session) => {
+    await Product.findOneAndUpdate(
         {
             _id: productId,
             'variants.color': color,
@@ -149,8 +150,8 @@ const reduceInventoryQuantity = async (productId, color, size) => {
         },
         {
             new: true,
-            session: session,
+            session: session, // Pass session to ensure atomic operations
             arrayFilters: [{ 'v.color': color }, { 's.size': size }],
         }
-    ).exec();
+    );
 };
