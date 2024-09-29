@@ -31,7 +31,7 @@ export const handleWebhook = async (req, res) => {
         session.startTransaction();
 
         const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-            apiVersion: '2024-06-20',
+            apiVersion: process.env.STRIPE_API_VERSION,
         });
 
         const event = stripe.webhooks.constructEvent(

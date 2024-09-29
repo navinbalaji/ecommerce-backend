@@ -164,7 +164,7 @@ const generatePayment = async (
             throw new Error('Payment Failed CODE 1');
         }
         const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-            apiVersion: '2024-06-20',
+            apiVersion: process.env.STRIPE_API_VERSION,
         });
 
         const formattedAmount = Math.round(amount * 100);
