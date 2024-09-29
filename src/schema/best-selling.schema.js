@@ -19,4 +19,4 @@ export const bestSellingSchema = new Schema(
     }
 );
 
-export default model('BestSelling', bestSellingSchema);
+export default model('bestSelling', bestSellingSchema);
