@@ -25,6 +25,8 @@ import { successResponse, failureResponse } from '#common';
  */
 
 export const handleWebhook = async (req, res) => {
+
+    console.log("******** stripe webhook called ******** ")
     const session = await mongoose.startSession();
     try {
         session.startTransaction();

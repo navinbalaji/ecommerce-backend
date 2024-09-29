@@ -48,7 +48,7 @@ export const generateOrderNumber = () => customAlphabet('1234567890', 10);
 
 export const sendEmail = async (to, subject, html) => {
     const transporter = nodemailer.createTransport({
-        host: 'gmail',
+        service: 'gmail',
         port: 587,
         secure: false, // Use `true` for port 465, `false` for all other ports
         auth: {
