@@ -76,7 +76,14 @@ export const createAndUpdateCart = async (req, res) => {
                 : new_delivery_address,
         };
 
-        if (!cartUpdateData.delivery_address) {
+        if (
+            !cartUpdateData.delivery_address ||
+            !cartUpdateData.delivery_address.line1 ||
+            !cartUpdateData.delivery_address.city ||
+            !cartUpdateData.delivery_address.state ||
+            !cartUpdateData.delivery_address.country ||
+            !cartUpdateData.delivery_address.pincode
+        ) {
             throw new Error('Please add the address');
         }
 
@@ -88,6 +95,7 @@ export const createAndUpdateCart = async (req, res) => {
             .exec();
         if (customerCart) {
             customerCart.products = eligibleProductsForOrder;
+            customerCart.delivery_address = cartUpdateData.delivery_address;
             cartData = await customerCart.save({ session });
         } else {
             [cartData] = await Cart.create([cartUpdateData], { session });
