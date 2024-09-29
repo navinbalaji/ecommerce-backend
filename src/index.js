@@ -27,7 +27,7 @@ app.use(
     })
 );
 app.use(morgan('tiny'));
-app.use(express.json())
+app.use(express.json({limit: '15mb'}))
 app.get('/ping', (_, res) => res.status(200).send('pong'));
 app.use('/auth', authRouter);
 app.use('/product', productRouter);
