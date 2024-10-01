@@ -9,7 +9,7 @@ import BestSelling from '#schema/best-selling.schema.js';
 
 // utils
 import { successResponse, failureResponse } from '#common';
-import { PRODUCT_STATUS_CONSTANT } from '#src/constants.js';
+import { PRODUCT_STATUS_CONSTANT,PRODUCT_SIZES ,GENDER} from '#src/constants.js';
 import { productFilterTransform } from '#transformers/product.transformer.js';
 
 /**
@@ -386,7 +386,9 @@ export const getAllProductFilters = async (req, res) => {
         // Transform the filters
         const filters = productFilterTransform(
             uniqueColors,
-            uniqueProductTypes
+            uniqueProductTypes,
+            GENDER,
+            PRODUCT_SIZES
         );
 
         return res
