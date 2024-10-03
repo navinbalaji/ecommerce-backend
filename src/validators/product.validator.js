@@ -48,6 +48,7 @@ const variantSchema = yup.object().shape({
 
 export const productCreateSchema = yup.object().shape({
     title: yup.string().required('Title is required'),
+    description:yup.string().required('Description is required'),
     gender: yup.mixed().oneOf(GENDER).required('Gender is required'),
     product_type: yup.string().required('Product Type is required'),
     status: yup
@@ -56,6 +57,7 @@ export const productCreateSchema = yup.object().shape({
         .required('Product Status is required'),
     tags: yup.array().of(yup.string()).notRequired(),
     image_src: yup.string().required('Product Image is required'),
+    size_chart_src: yup.string().required('Size Chart Image is required'),
     variants: yup
         .array()
         .of(variantSchema)

@@ -91,6 +91,9 @@ const productSchema = new Schema(
             type: [String],
             index: true,
         },
+        image_src: {
+            type: String,
+        },
         size_chart_src: {
             type: String,
         },
