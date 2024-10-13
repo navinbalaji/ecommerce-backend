@@ -11,7 +11,7 @@ import BestSelling from '#schema/best-selling.schema.js';
 import InventoryReduce from '#schema/inventory-reduce.schema.js';
 
 // service
-import { generateOrderSuccessEmail } from '../order/order.service.js';
+// import { generateOrderSuccessEmail } from '../order/order.service.js';
 
 // utils
 import { successResponse, failureResponse } from '#common';
@@ -84,7 +84,7 @@ export const handleWebhook = async (req, res) => {
 
         // Update Analytics
         await Analytics.findOneAndUpdate(
-            { name: 'dashboard' },
+            { shop: 'prajGeos' },
             {
                 $inc: {
                     total_order_amount: inventoryDoc.order_amount,
@@ -116,7 +116,7 @@ export const handleWebhook = async (req, res) => {
         const orderDoc = await order.save({ session });
 
         // Generate order success email
-        await generateOrderSuccessEmail(orderDoc);
+        // await generateOrderSuccessEmail(orderDoc);
 
         // Commit the transaction
         await session.commitTransaction();

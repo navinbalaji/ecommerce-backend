@@ -2,6 +2,11 @@ import { Schema, model } from 'mongoose';
 
 const analyticsSchema = new Schema(
     {
+        shop:{
+            type: String,
+            default:"prajGeos",
+            index: true,
+        },
         name: {
             type: String,
             default: 'dashboard',

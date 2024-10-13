@@ -30,7 +30,7 @@ export const createProduct = async (req, res) => {
 
         // Update analytics
         await Analytics.findOneAndUpdate(
-            { name: 'dashboard' },
+            { shop: 'prajGeos' },
             { $inc: { total_products: 1 } },
             { upsert: true, session }
         );
@@ -311,7 +311,7 @@ export const getNewProducts = async (req, res) => {
         );
     } catch (err) {
         return res
-            .status(400)
+            .status(200)
             .json(failureResponse(err?.message || 'something went wrong'));
     }
 };
@@ -352,7 +352,7 @@ export const getBestSellingProducts = async (req, res) => {
         );
     } catch (err) {
         return res
-            .status(400)
+            .status(200)
             .json(failureResponse(err?.message || 'something went wrong'));
     }
 };

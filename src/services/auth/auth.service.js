@@ -128,7 +128,7 @@ export const register = async (req, res) => {
 
         // Update analytics
         await Analytics.findOneAndUpdate(
-            { name: 'dashboard' },
+            { shop: 'prajGeos' },
             { $inc: { total_customers: 1 } },
             { upsert: true, session }
         );

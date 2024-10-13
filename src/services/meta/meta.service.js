@@ -2,6 +2,7 @@
 
 // schema
 import Meta from '#schema/meta.schema.js';
+import Analytics from '#schema/analytics.schema.js';
 
 // utils
 import { successResponse, failureResponse } from '#common';
@@ -56,6 +57,34 @@ export const updateMeta = async (req, res) => {
         return res
             .status(200)
             .json(successResponse('Meta updated successfully',metaTransform(metaDoc)));
+    } catch (err) {
+        return res
+            .status(400)
+            .json(failureResponse(err?.message || 'something went wrong'));
+    }
+};
+
+
+
+/**
+ * Handles a GET request to get analytics data.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response}
+ */
+
+export const getAnalyticsData = async (_, res) => {
+    try {
+        const analyticsData = await Analytics.findOne({ shop: 'prajGeos' }).lean().exec();
+
+        if (!analyticsData) {
+            return res.status(404).json(failureResponse('Analytics not found'));
+        }
+
+        return res
+            .status(200)
+            .json(successResponse('Analytics fetched successfully', { analyticsData }));
     } catch (err) {
         return res
             .status(400)

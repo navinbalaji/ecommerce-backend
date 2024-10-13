@@ -3,7 +3,11 @@
 import { Router } from 'express';
 
 // services
-import { getMeta, updateMeta } from '#services/meta/meta.service.js';
+import {
+    getMeta,
+    updateMeta,
+    getAnalyticsData,
+} from '#services/meta/meta.service.js';
 
 // validators
 import { metaUpdate } from '#src/validators/meta.validator.js';
@@ -17,7 +21,9 @@ import roleMiddleware from '#middleware/roleMiddleware.js';
 
 const metaRouter = new Router();
 
-metaRouter.get('/',getMeta);
+metaRouter.get('/', getMeta);
+
+metaRouter.get('/analytics', getAnalyticsData);
 
 metaRouter.put(
     '/',

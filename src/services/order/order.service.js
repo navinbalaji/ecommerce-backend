@@ -131,6 +131,10 @@ export const createOrder = async (req, res) => {
             { session }
         );
 
+        // TODO order changes
+        
+        await generateOrderSuccessEmail(order);
+
         await session.commitTransaction();
 
         return res.status(200).json(
@@ -254,7 +258,7 @@ export const getOrderByOrderId = async (req, res) => {
         if (!id) {
             throw new Error('Order Id is missing');
         }
-        const order = await Order.findOne({ order_id: id }).lean().exec();
+        const order = await Order.findById(id).lean().exec();
 
         if (!order) {
             return res.status(404).json(failureResponse('Order not found'));
