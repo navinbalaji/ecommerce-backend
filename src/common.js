@@ -47,6 +47,7 @@ export const validate = (schema) => async (req, res, next) => {
 export const generateOrderNumber = () => customAlphabet('1234567890', 10);
 
 export const sendEmail = async (to, subject, html) => {
+   try{
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         port: 587,
@@ -77,6 +78,10 @@ export const sendEmail = async (to, subject, html) => {
     });
 
     console.log('Message sent: %s', info.messageId);
+    return true
+   }catch(err){
+    return true
+   }
 };
 
 

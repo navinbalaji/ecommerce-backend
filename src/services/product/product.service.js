@@ -9,7 +9,11 @@ import BestSelling from '#schema/best-selling.schema.js';
 
 // utils
 import { successResponse, failureResponse } from '#common';
-import { PRODUCT_STATUS_CONSTANT,PRODUCT_SIZES ,GENDER} from '#src/constants.js';
+import {
+    PRODUCT_STATUS_CONSTANT,
+    PRODUCT_SIZES,
+    GENDER,
+} from '#src/constants.js';
 import { productFilterTransform } from '#transformers/product.transformer.js';
 
 /**
@@ -144,7 +148,7 @@ export const getAllProducts = async (req, res) => {
                     totalCount: [
                         {
                             $match: {
-                                            ...matchQuery,
+                                ...matchQuery,
                             },
                         },
                         { $count: 'total' }, // count the total number of documents
@@ -154,7 +158,12 @@ export const getAllProducts = async (req, res) => {
             {
                 $project: {
                     data: 1,
-                    totalCount: { $ifNull: [{ $arrayElemAt: ['$totalCount.total', 0] }, 0] }, 
+                    totalCount: {
+                        $ifNull: [
+                            { $arrayElemAt: ['$totalCount.total', 0] },
+                            0,
+                        ],
+                    },
                 },
             },
         ];
@@ -163,9 +172,16 @@ export const getAllProducts = async (req, res) => {
 
         const { data, totalCount } = products; // extract the data and total count
 
+        // Filtered by inventory quantity
+        const filteredProducts = data.filter((product) =>
+            product.variants.some((variant) =>
+                variant.sizes.some((size) => size.inventory_quantity > 0)
+            )
+        );
+
         return res.status(200).json(
             successResponse('Products fetched successfully', {
-                products: data,
+                products: filteredProducts,
                 totalCount,
             })
         );

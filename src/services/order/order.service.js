@@ -444,6 +444,5 @@ export const generateOrderSuccessEmail = async (order) => {
         await sendEmail(customerEmail, subject, emailHtml);
     } catch (error) {
         console.error('Error generating order success email:', error);
-        throw error;
     }
 };
