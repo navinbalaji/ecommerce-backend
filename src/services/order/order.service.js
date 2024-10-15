@@ -386,8 +386,7 @@ export const generateOrderSuccessEmail = async (order) => {
         const deliveryAddress = cart.delivery_address;
         const products = cart.products;
 
-        const subject = `Your Order #${order_id} Has Been Successfully Placed!
-`;
+        const subject = `Your Order #${order_id} Has Been Successfully Placed!`;
 
         // Build the products list HTML
         const productListHtml = products

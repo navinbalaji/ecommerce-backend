@@ -50,6 +50,8 @@ export const createAndUpdateCart = async (req, res) => {
             .session(session)
             .exec();
 
+        const notEligibleProducts = [];
+
         const eligibleProductsForOrder = products.filter((cartProduct) => {
             const sizedProduct = allProducts
                 ?.find(
@@ -59,12 +61,20 @@ export const createAndUpdateCart = async (req, res) => {
                 )
                 ?.variants.find((v) => v?.color === cartProduct?.color)
                 ?.sizes?.find((e) => e?.size === cartProduct?.size);
-            return (
+
+            const isEligible =
                 sizedProduct &&
                 sizedProduct.inventory_quantity > 0 &&
                 sizedProduct.inventory_quantity >=
-                    (cartProduct ? cartProduct.quantity : 0)
-            );
+                    (cartProduct ? cartProduct.quantity : 0);
+
+            if (!isEligible) {
+                notEligibleProducts.push(
+                    `The requested quantity for the product (${cartProduct.product_name}) is out-of-stock`
+                );
+            }
+
+            return isEligible;
         });
 
         const cartUpdateData = {
@@ -104,7 +114,12 @@ export const createAndUpdateCart = async (req, res) => {
         await session.commitTransaction();
         return res
             .status(200)
-            .json(successResponse('Cart created successfully', { cartData }));
+            .json(
+                successResponse('Cart created successfully', {
+                    cartData,
+                    notEligibleProducts,
+                })
+            );
     } catch (err) {
         if (session.inTransaction) {
             await session.abortTransaction();
