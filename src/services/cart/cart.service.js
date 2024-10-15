@@ -23,7 +23,7 @@ export const createAndUpdateCart = async (req, res) => {
     try {
         session.startTransaction();
 
-        const {
+        let {
             customer_id,
             is_default_address,
             new_delivery_address,
@@ -50,6 +50,12 @@ export const createAndUpdateCart = async (req, res) => {
             .session(session)
             .exec();
 
+        const customerCart = await Cart.findOne({
+            customer_id: Types.ObjectId.createFromHexString(customer_id),
+        })
+            .session(session)
+            .exec();
+
         const notEligibleProducts = [];
 
         const eligibleProductsForOrder = products.filter((cartProduct) => {
@@ -69,6 +75,21 @@ export const createAndUpdateCart = async (req, res) => {
                     (cartProduct ? cartProduct.quantity : 0);
 
             if (!isEligible) {
+                const [cartProductTemp] = customerCart.products.filter(
+                    (e) => e.product_id?.toString() === cartProduct?.product_id?.toString()
+                );
+                if(cartProductTemp){
+                    products = products.map((e) => {
+                        if (e.product_id.toString() === cartProduct?.product_id?.toString()) {
+                            return {
+                                ...e,
+                                quantity: cartProductTemp.quantity,
+                            };
+                        }
+                        return e;
+                    });
+                }
+        
                 notEligibleProducts.push(
                     `The requested quantity for the product (${cartProduct.product_name}) is out-of-stock`
                 );
@@ -76,6 +97,16 @@ export const createAndUpdateCart = async (req, res) => {
 
             return isEligible;
         });
+
+        if (notEligibleProducts.length > 0) {
+            req.body['products']=products
+            return res.status(200).json(
+                successResponse('Cart created successfully', {
+                    cartData: req.body,
+                    notEligibleProducts,
+                })
+            );
+        }
 
         const cartUpdateData = {
             email: customer.email,
@@ -98,11 +129,7 @@ export const createAndUpdateCart = async (req, res) => {
         }
 
         let cartData;
-        const customerCart = await Cart.findOne({
-            customer_id: Types.ObjectId.createFromHexString(customer_id),
-        })
-            .session(session)
-            .exec();
+
         if (customerCart) {
             customerCart.products = eligibleProductsForOrder;
             customerCart.delivery_address = cartUpdateData.delivery_address;
@@ -112,14 +139,11 @@ export const createAndUpdateCart = async (req, res) => {
         }
 
         await session.commitTransaction();
-        return res
-            .status(200)
-            .json(
-                successResponse('Cart created successfully', {
-                    cartData,
-                    notEligibleProducts,
-                })
-            );
+        return res.status(200).json(
+            successResponse('Cart created successfully', {
+                cartData,
+            })
+        );
     } catch (err) {
         if (session.inTransaction) {
             await session.abortTransaction();
