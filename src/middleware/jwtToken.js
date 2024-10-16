@@ -29,7 +29,7 @@ const tokenExpirationMiddleware = (req, res, next) => {
                     failureResponse('Token has expired. Please login again.')
                 );
         }
-        return res.status(400).json(failureResponse('Invalid token.'));
+        return res.status(401).json(failureResponse('Invalid token.'));
     }
 };
 

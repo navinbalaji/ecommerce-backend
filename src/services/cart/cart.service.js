@@ -91,7 +91,7 @@ export const createAndUpdateCart = async (req, res) => {
                 }
         
                 notEligibleProducts.push(
-                    `The requested quantity for the product (${cartProduct.product_name}) is out-of-stock`
+                    `The requested quantity for the product (${cartProduct.product_name}) is not available`
                 );
             }
 
