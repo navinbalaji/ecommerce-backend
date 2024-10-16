@@ -132,7 +132,7 @@ export const createOrder = async (req, res) => {
         );
 
         // TODO order changes
-        
+
         await generateOrderSuccessEmail(order);
 
         await session.commitTransaction();
@@ -318,44 +318,52 @@ export const updateOrder = async (req, res) => {
 
 export const getCustomerOrders = async (req, res) => {
     try {
-        const { offset, limit } = req.query;
+        const { offset, limit, order_id } = req.query;
 
         const id = req?.user?.cid;
 
         if (!id) {
-            throw new Error('Customer Id is missing');
+            return res.status(401).json(failureResponse('Customer Id is missing'));
         }
+
+        const matchQuery = {
+            customer_id: Types.ObjectId.createFromHexString(id),
+        };
+
+        if (order_id) {
+            matchQuery['order_id'] = order_id;
+        }
+
+        const offsetValue = Math.max(0, Number(offset) || 0);
+        const limitValue = Math.min(Math.max(1, Number(limit) || 10), 100); // max limit of 100
 
         const pipeline = [
             {
+                $match: { ...matchQuery }, // Apply the match query here
+            },
+            {
                 $facet: {
                     data: [
-                        {
-                            $match: {
-                                customer_id:
-                                    Types.ObjectId.createFromHexString(id),
-                            },
-                        },
-                        { $skip: Number(offset) || 0 },
-                        { $limit: Number(limit) || 10 }, // default limit to 10 if not provided
+                        { $skip: offsetValue },
+                        { $limit: limitValue },
                         { $sort: { _id: 1 } },
                     ],
                     totalCount: [
-                        { $count: 'total' }, // count the total number of documents
+                        { $count: 'total' }, // Count the total number of documents after matching
                     ],
                 },
             },
             {
                 $project: {
                     data: 1,
-                    totalCount: { $arrayElemAt: ['$totalCount.total', 0] }, // extract the total count from the array
+                    totalCount: { $arrayElemAt: ['$totalCount.total', 0] }, // Extract the total count from the array
                 },
             },
         ];
 
         const [orders] = await Order.aggregate(pipeline);
 
-        const { data, totalCount } = orders; // extract the data and total count
+        const { data, totalCount } = orders;
 
         return res.status(200).json(
             successResponse('Customer Orders fetched successfully', {
@@ -366,7 +374,7 @@ export const getCustomerOrders = async (req, res) => {
     } catch (err) {
         return res
             .status(400)
-            .json(failureResponse(err?.message || 'something went wrong'));
+            .json(failureResponse(err?.message || 'Something went wrong'));
     }
 };
 
